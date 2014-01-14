@@ -1,0 +1,48 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+\documentclass[12pt,a4paper]{article}
+\usepackage{fontspec,xltxtra,xunicode}
+
+% in texlive-science
+\usepackage{algorithm}
+% an improvement from algorithmicx for algorithmic
+\usepackage{algpseudocode}
+% 彩色字
+\usepackage{xcolor}
+% 数学宏包
+\usepackage{amsmath,amsthm,amsfonts,amssymb,bm}
+% 图形宏包
+\usepackage{graphicx,psfrag}
+% 源代码宏包
+\usepackage{listings}
+% 表格
+\usepackage{booktabs}
+
+%文章内中文自动换行
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
+
+% 段落缩进
+\setlength{\parindent}{2em}
+% 段落间距
+\setlength{\parskip}{1.0ex plus0.3ex minus0.3ex}
+% 行距倍数
+\linespread{1.0}
+
+% 中文字体
+\newfontfamily{\ZHK}{KaiTi}
+\newfontfamily{\ZHH}{MicrosoftYaHei}
+\newfontfamily{\ZHS}{SimSun}
+% 英文字体
+\newfontfamily{\ENA}{Arial}
+\newfontfamily{\ENL}{Lucida Console}
+\newfontfamily{\ENT}{Times New Roman}
+% 默认字体
+\setromanfont{SimSun}
+
+% 五号字体
+\newcommand{\Hfive}{\fontsize{10.5pt}{12.6pt}\selectfont}
+% 小四字体
+\newcommand{\Hmfour}{\fontsize{12pt}{14pt}\selectfont}
+% 四号字体
+\newcommand{\Hfour}{\fontsize{14pt}{\baselineskip}\selectfont}
