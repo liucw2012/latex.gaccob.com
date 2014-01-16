@@ -17,6 +17,8 @@
 \usepackage{listings}
 % 表格
 \usepackage{booktabs}
+% 页眉页脚
+\usepackage{fancyhdr}
 
 %文章内中文自动换行
 \XeTeXlinebreaklocale "zh"
@@ -28,6 +30,15 @@
 \setlength{\parskip}{1.0ex plus0.3ex minus0.3ex}
 % 行距倍数
 \linespread{1.0}
+
+% 页眉页脚设置
+\pagestype {fancy}
+% 右页眉 章节名称
+\rhead {\thesection \sectionname}
+% 左页眉 页码
+\lhead {\thepage}
+% 页脚 声明
+\cfoot { 本着自由的精神, 本文档可以随意阅读,修改,发布；如涉及相关引用的版权问题, 请联系gaccob@qq.com及时修改. }
 
 % 中文字体
 \newfontfamily{\ZHK}{KaiTi}
