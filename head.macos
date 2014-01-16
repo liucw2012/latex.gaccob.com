@@ -19,6 +19,10 @@
 \usepackage{booktabs}
 % 页眉页脚
 \usepackage{fancyhdr}
+% 自定义章节格式
+\usepackage{titlesec}
+% 缩进
+\usepackage{indentfirst}
 
 %文章内中文自动换行
 \XeTeXlinebreaklocale "zh"
@@ -30,15 +34,6 @@
 \setlength{\parskip}{1.0ex plus0.3ex minus0.3ex}
 % 行距倍数
 \linespread{1.0}
-
-% 页眉页脚设置
-\pagestype {fancy}
-% 右页眉 章节名称
-\rhead {\thesection \sectionname}
-% 左页眉 页码
-\lhead {\thepage}
-% 页脚 声明
-\cfoot { 本着自由的精神, 本文档可以随意阅读,修改,发布；如涉及相关引用的版权问题, 请联系gaccob@qq.com及时修改. }
 
 % 中文字体
 \newfontfamily{\ZHK}{KaiTi}
@@ -57,3 +52,24 @@
 \newcommand{\Hmfour}{\fontsize{12pt}{14pt}\selectfont}
 % 四号字体
 \newcommand{\Hfour}{\fontsize{14pt}{\baselineskip}\selectfont}
+
+% 修改section style
+\titleformat{\section}{\ZHH}{\thesection .}{1em}{}
+
+% 页眉页脚设置
+\pagestyle {fancy}
+% 清空页眉、页脚 
+\fancyhf{}
+% 页眉
+\fancyhead[L]{ {第} \thepage { 页} }
+\fancyhead[R]{\rightmark}
+\markright{sub-mark}
+\renewcommand\sectionmark[1]{\markright{\ZHH \thesection. #1}}
+
+% 页脚
+\cfoot {\Hfive \emph 本着自由的精神, 本文档可以随意阅读,修改,发布；如涉及相关引用的版权问题, 请联系gaccob@qq.com及时修改. }
+% 页脚 分割线宽度
+\renewcommand{\footrulewidth}{0.4pt}
+% 页眉 分割线宽度
+\renewcommand{\headrulewidth}{0.4pt}
+
