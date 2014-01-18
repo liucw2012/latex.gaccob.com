@@ -23,6 +23,8 @@
 \usepackage{titlesec}
 % 缩进
 \usepackage{indentfirst}
+% 超链接
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
 
 %文章内中文自动换行
 \XeTeXlinebreaklocale "zh"
@@ -62,9 +64,7 @@
 \fancyhf{}
 % 页眉
 \fancyhead[L]{ {第} \thepage { 页} }
-\fancyhead[R]{\rightmark}
-\markright{sub-mark}
-\renewcommand\sectionmark[1]{\markright{\ZHH \thesection. #1}}
+\fancyhead[R]{ \url{latex.gaccob.com} }
 
 % 页脚
 \cfoot {\Hfive \emph 本着自由的精神, 本文档可以随意阅读,修改,发布；如涉及相关引用的版权问题, 请联系gaccob@qq.com及时修改. }
