@@ -4,7 +4,7 @@
 \usepackage{fontspec,xltxtra,xunicode}
 
 % in texlive-science
-\usepackage{algorithm}
+\usepackage{algorithmicx}
 % an improvement from algorithmicx for algorithmic
 \usepackage{algpseudocode}
 % 彩色字
@@ -25,6 +25,17 @@
 \usepackage{indentfirst}
 % 超链接
 \usepackage[colorlinks,linkcolor=blue]{hyperref}
+% 源码
+\usepackage{listings}
+\lstset{numbers=left,
+    numberstyle=\tiny,
+    keywordstyle=\color{blue!70},
+    commentstyle=\color{red!50!green!50!blue!50},
+    frame=shadowbox,
+    rulesepcolor=\color{red!20!green!20!blue!20},
+    breaklines,
+    basicstyle=\footnotesize
+}
 
 %文章内中文自动换行
 \XeTeXlinebreaklocale "zh"
@@ -60,7 +71,7 @@
 
 % 页眉页脚设置
 \pagestyle {fancy}
-% 清空页眉、页脚 
+% 清空页眉、页脚
 \fancyhf{}
 % 页眉
 \fancyhead[L]{ {第} \thepage { 页} }
