@@ -14,14 +14,13 @@ xelatex_pdf()
     data="$2";
     cd "$SRC/$cat/$data";
     echo "start xelatex $SRC/$cat/$data";
-    rm "./$TMP*";
+    rm -rf "$TMP.tex";
     cat "../../../$HEAD" "data.tex" >> "$TMP.tex";
-
-    # fork call
-    ../../../build_pdf.sh "$TMP" 2>&1;
+    xelatex "$TMP.tex" > /dev/null 2>&1;
     mv "$TMP.pdf" "../../../$DST/$cat/$data.pdf";
-    rm "./$TMP*";
+    rm -rf "$TMP.log" "$TMP.aux" "$TMP.tex" "$TMP.out"; 
     echo "complete xelatex $SRC/$cat/$data";
+    echo -e "\n";
     cd "$DIR"
 }
 
