@@ -392,6 +392,31 @@ matrix_sr(struct matrix *mat, int sx, int sy, int d) {
         \end{bmatrix}
         \end{equation}
     }
+
+    \gaccobsplitinv
+
+    \item{ {\ZHH{矩阵的lua接口}}\par
+        \begin{lstlisting}[language=C]
+int
+ejoy2d_matrix(lua_State *L) {
+	luaL_Reg l[] = {
+		{ "new", lnew },
+		{ "scale", lscale },
+		{ "trans", ltrans },
+		{ "rot", lrot },
+		{ "inverse", linverse },
+		{ "mul", lmul },
+		{ "tostring", ltostring },
+		{ "identity", lidentity},
+		{ NULL, NULL },
+	};
+	luaL_newlib(L,l);
+	return 1;
+}
+        \end{lstlisting}
+        这其中要注意的一点是, 如果lnew()没有输入参数的话, 则返回归一矩阵(scale 1024).
+    }
+
     \end {enumerate}
 }
 
