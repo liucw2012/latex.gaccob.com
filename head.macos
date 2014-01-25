@@ -24,10 +24,10 @@
 % 缩进
 \usepackage{indentfirst}
 % 超链接
-\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage[colorlinks,linkcolor=brown]{hyperref}
 % 源码
 \usepackage{listings}
-\lstset{numbers=left,
+\lstset{ numbers=left,
     numberstyle=\tiny,
     keywordstyle=\color{blue!70},
     commentstyle=\color{red!50!green!50!blue!50},
@@ -84,3 +84,16 @@
 % 页眉 分割线宽度
 \renewcommand{\headrulewidth}{0.4pt}
 
+% 分割线
+\newcommand{\gaccobsplit}{
+    \vspace*{10pt}
+    {================================================================}
+    \par
+    {================================================================}
+    \par
+    \vspace*{10pt}
+}
+\newcommand{\gaccobsplitinv}{
+    \vspace*{8pt}
+    \par
+}

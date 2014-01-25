@@ -16,9 +16,11 @@ xelatex_pdf()
     echo "start xelatex $SRC/$cat/$data";
     rm -rf "$TMP.tex";
     cat "../../../$HEAD" "data.tex" >> "$TMP.tex";
+    # do twice to make sure generate reference
+    xelatex "$TMP.tex" > /dev/null 2>&1;
     xelatex "$TMP.tex" > /dev/null 2>&1;
     mv "$TMP.pdf" "../../../$DST/$cat/$data.pdf";
-    rm -rf "$TMP.log" "$TMP.aux" "$TMP.tex" "$TMP.out"; 
+    rm -rf "$TMP.log" "$TMP.aux" "$TMP.tex" "$TMP.out";
     echo "complete xelatex $SRC/$cat/$data";
     echo -e "\n";
     cd "$DIR"
