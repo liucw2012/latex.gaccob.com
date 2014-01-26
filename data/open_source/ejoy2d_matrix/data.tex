@@ -1,13 +1,13 @@
 \begin {document}
 
-\title {\ZHH \huge ejoy2d源码学习}
+\title {\ZHH \huge ejoy2d源码学习之matrix}
 \author {\small gaccob}
 \date {\small 2014 年 1 月 25 日}
 \maketitle
 
 \vspace {10pt}
-\section{\huge \ZHH ejoy2d.matrix} {
-    { 在学习这一段代码之前, 先引入一些{\ZHH{矩阵的基础理论}}. }
+\section{\Large \ZHH 矩阵理论基础} {
+    { 在学习这一段代码之前, 先引入一些矩阵的基础理论. }
 
     \begin {itemize}
 
@@ -109,16 +109,17 @@
         \end{equation}
     }
     \end {itemize}
+}
 
-    \gaccobsplit
+\section {\Large \ZHH 源码分析} {
 
-    { 简单回顾一下理论, 下面就可以开始ejoy2d的{\ZHH{矩阵源码分析}}, lib/matrix.c和lib/matrix.h封装了矩阵的操作, lib/lmatrix.c和lib/lmatrix.h是lua调用c的接口.}
+    { 简单回顾一下理论, 下面就可以开始ejoy2d的矩阵源码分析, lib/matrix.c和lib/matrix.h封装了矩阵的操作, lib/lmatrix.c和lib/lmatrix.h是lua调用c的接口.}
 
     \begin {enumerate}
 
     \gaccobsplitinv
 
-    \item { 6元组表示的{\ZHH{矩阵(matrix)}}:
+    \item { 六元组表示的{\ZHH{矩阵(matrix)}}:
         \begin{lstlisting}[language={[ANSI]C}]
 struct matrix {
 int m[6];
