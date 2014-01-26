@@ -1,0 +1,55 @@
+\begin{document}
+\title {\ZHH \huge bash的常用整理}
+\author {\small gaccob}
+\date {\small 2014 年 1 月 26 日}
+\maketitle
+
+\section {\ZHH bash脚本的参数} {
+    { \textcolor{blue}{手工的处理方式}: } \par
+    \begin{itemize}
+    \item {\small \$0: 指脚本自己, 例如test.sh. }
+    \item {\small \$1: 第一个参数, 依次类推\$2, \$3 ... }
+    \item {\small \$\#: 参数的个数. }
+    \item {\small \$@: 所有的参数, 是一个数组. }
+    \item {\small \$*: 所有的参数, 与\$@不一样的是它是一个字符串. }
+    \end{itemize} \par
+    { 一个简单的使用sample: }\par
+    \gaccobsplitinv
+    \begin{lstlisting}[language=bash]
+    for arg in "$@"
+    do
+        echo $arg
+    done
+    \end{lstlisting}
+
+    \gaccobsplitinv
+
+    { \textcolor{blue}{getopts的处理方式}: }\par
+    { (这里只讨论短选项, 长选项需要getopt, 会复杂一些). } \par
+    \gaccobsplitinv
+    \begin{lstlisting}[language=bash]
+    while getopts "a:bc" arg
+    do
+        case $arg in
+            a) echo -e "argument a: $OPTARG\n" ;;
+            b) echo -e "argument b\n" ;;
+            c) echo -e "argument c\n" ;;
+            ?) echo -e "usage: ./test <-a **> <-b> <-c>" ;;
+        esac
+    done
+    \end{lstlisting}
+    { 上面这个sample中: }\par
+    \begin{itemize}
+    \item {\small "a:bc"代表了-a需要参数, b和c是无参数的选项. }
+    \item {\small case ? 代表了任何不识别的选项. }
+    \end{itemize}
+}
+
+
+\section {\ZHH 获取当前脚本目录} {
+    \begin{lstlisting}[language=bash]
+    echo "$( cd "$( dirname "$0" )" && pwd )";
+    \end{lstlisting}
+}
+
+\end{document}
