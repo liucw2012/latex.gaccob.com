@@ -23,8 +23,7 @@ xelatex_pdf()
     xelatex "$TMP.tex" > /dev/null 2>&1;
     mv "$TMP.pdf" "../../../$DST/$cat/$data.pdf";
     rm -rf "$TMP.log" "$TMP.aux" "$TMP.tex" "$TMP.out";
-    echo "complete xelatex $src/$cat/$data";
-    echo -e "\n";
+    echo -e "complete xelatex $src/$cat/$data\n";
     cd "$DIR"
 }
 
@@ -54,23 +53,27 @@ do_xelatex()
                 exit 0
             fi
         fi
-        echo -e "$TARGER not found fail\n"
+        echo -e "$TARGET not found fail\n"
     fi
 }
 
-while getopts "d:h" arg
-do
-    case $arg in
-        d) echo -e "target: $OPTARG\n"
-           TARGET=$OPTARG
-           ;;
-        h) echo -e "usage:\n\t./build.sh <-d target> <-h>"
-           exit 1
-           ;;
-        ?) echo -e "usage:\n\t./build.sh <-d target> <-h>"
-           exit 1
-           ;;
-    esac
-done
+if [ $# = 1 ]; then
+    TARGET=$1
+else
+    while getopts "d:h" arg
+    do
+        case $arg in
+            d) echo -e "target: $OPTARG\n"
+               TARGET=$OPTARG
+               ;;
+            h) echo -e "usage:\n\t./build.sh <-d target> <-h>"
+               exit 1
+               ;;
+            *) echo -e "usage:\n\t./build.sh <-d target> <-h>"
+               exit 1
+               ;;
+        esac
+    done
+fi
 
 do_xelatex
