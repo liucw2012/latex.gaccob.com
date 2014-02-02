@@ -9,9 +9,25 @@ HEAD="head.macos"
 TMP="_tmp"
 TARGET="_all"
 
-xelatex_pdf()
+function scp_target()
 {
-    src="$1"
+    scp_src="$1";
+    
+    # environment varaibles
+    pub_host="$VPS_HOST";
+    pub_dir="/usr/local/nginx/html";
+    pub_usr="$VPS_USR";
+    pub_passwd="$VPS_PASSWD";
+
+    expect -c "set timeout -1;
+        spawn scp -p -o StrictHostKeyChecking=no -r $DST/$scp_src $pub_usr@$pub_host:$pub_dir/$scp_src;
+        expect "*assword:*" { send $pub_passwd\r\n; }; 
+        expect eof {exit;}; "
+}
+
+function xelatex_pdf()
+{
+    src="$1";
     cat="$2";
     data="$3";
     cd "$src/$cat/$data";
@@ -28,8 +44,9 @@ xelatex_pdf()
 }
 
 # loop data
-do_xelatex()
+function do_xelatex()
 {
+    # all blog files 
     if [ $TARGET = "_all" ]; then
         echo -e "start to xelatex all...\n"
         for cat in `ls $SRC`
@@ -40,9 +57,12 @@ do_xelatex()
                     for data in `ls $SRC/$cat`
                     do
                         xelatex_pdf "$SRC" "$cat" "$data"
+                        scp_target "$cat/$data.pdf"
                     done
             fi
         done
+
+    # set target blog file
     else
         if [ -d "$TARGET" ]; then
             src=`echo $TARGET | awk -F"/" '{print $1}'`
@@ -50,13 +70,15 @@ do_xelatex()
             data=`echo $TARGET | awk -F"/" '{print $3}'`
             if [ -d "$src/$cat/$data" ]; then
                 xelatex_pdf "$src" "$cat" "$data"
-                exit 0
+                scp_target "$cat/$data.pdf"
             fi
+        else
+            echo -e "$TARGET not found fail\n"
         fi
-        echo -e "$TARGET not found fail\n"
     fi
 }
 
+# argument --> target
 if [ $# = 1 ]; then
     TARGET=$1
 else
@@ -77,3 +99,5 @@ else
 fi
 
 do_xelatex
+scp_target "index.html"
+
