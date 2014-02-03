@@ -4,10 +4,11 @@ DIR="$( cd "$( dirname "$0" )" && pwd )";
 cd "$DIR";
 
 SRC="data";
-DST="publish"
-HEAD="head.macos"
-TMP="_tmp"
-TARGET="_all"
+DST="publish";
+HEAD="head.macos";
+TMP="_tmp";
+TARGET="_all";
+FLAG_SCP=1;
 
 function scp_target()
 {
@@ -30,8 +31,10 @@ function xelatex_pdf()
     src="$1";
     cat="$2";
     data="$3";
+
     cd "$src/$cat/$data";
     echo "start xelatex $src/$cat/$data";
+
     rm -rf "$TMP.tex";
     cat "../../../$HEAD" "data.tex" >> "$TMP.tex";
     # do twice to make sure generate reference
@@ -39,6 +42,7 @@ function xelatex_pdf()
     xelatex "$TMP.tex" > /dev/null 2>&1;
     mv "$TMP.pdf" "../../../$DST/$cat/$data.pdf";
     rm -rf "$TMP.log" "$TMP.aux" "$TMP.tex" "$TMP.out";
+
     echo -e "complete xelatex $src/$cat/$data\n";
     cd "$DIR"
 }
@@ -51,14 +55,15 @@ function do_xelatex()
         echo -e "start to xelatex all...\n"
         for cat in `ls $SRC`
         do
-            if [ -d "$SRC/$cat" ];
-                then
-                    mkdir -p "$DST/$cat";
-                    for data in `ls $SRC/$cat`
-                    do
-                        xelatex_pdf "$SRC" "$cat" "$data"
+            if [ -d "$SRC/$cat" ]; then
+                mkdir -p "$DST/$cat";
+                for data in `ls $SRC/$cat`
+                do
+                    xelatex_pdf "$SRC" "$cat" "$data"
+                    if [ $FLAG_SCP = 1 ]; then
                         scp_target "$cat/$data.pdf"
-                    done
+                    fi
+                done
             fi
         done
 
@@ -70,7 +75,9 @@ function do_xelatex()
             data=`echo $TARGET | awk -F"/" '{print $3}'`
             if [ -d "$src/$cat/$data" ]; then
                 xelatex_pdf "$src" "$cat" "$data"
-                scp_target "$cat/$data.pdf"
+                if [ $FLAG_SCP = 1 ]; then
+                    scp_target "$cat/$data.pdf"
+                fi
             fi
         else
             echo -e "$TARGET not found fail\n"
@@ -82,16 +89,18 @@ function do_xelatex()
 if [ $# = 1 ]; then
     TARGET=$1
 else
-    while getopts "d:h" arg
+    while getopts "d:hn" arg
     do
         case $arg in
             d) echo -e "target: $OPTARG\n"
                TARGET=$OPTARG
                ;;
-            h) echo -e "usage:\n\t./build.sh <-d target> <-h>"
+            n) FLAG_SCP=0
+               ;;
+            h) echo -e "usage:\n\t./build.sh <-d target> <-h> <-n no scp>"
                exit 1
                ;;
-            *) echo -e "usage:\n\t./build.sh <-d target> <-h>"
+            *) echo -e "usage:\n\t./build.sh <-d target> <-h> <-n no scp>"
                exit 1
                ;;
         esac
@@ -99,5 +108,6 @@ else
 fi
 
 do_xelatex
-scp_target "index.html"
-
+if [ $FLAG_SCP = 1 ]; then
+    scp_target "index.html"
+fi

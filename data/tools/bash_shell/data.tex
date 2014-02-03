@@ -1,5 +1,5 @@
 \begin{document}
-\title {\ZHH \huge bash的常用整理}
+\title {\ZHH \huge 常用bash shell整理}
 \author {\small gaccob}
 \date {\small 2014 年 1 月 26 日}
 \maketitle
@@ -48,7 +48,45 @@
 
 \section {\ZHH 获取当前脚本目录} {
     \begin{lstlisting}[language=bash]
-    echo "$( cd "$( dirname "$0" )" && pwd )";
+    function get_pwd()
+    {
+        echo "$( cd "$( dirname "$0" )" && pwd )";
+    }
+    \end{lstlisting}
+}
+
+
+\section {\ZHH 遍历嵌套文件夹} {
+    \begin{lstlisting}[language=bash]
+    function loop_dir()
+    {
+        dir="$1";
+        for sub in $dir
+        do
+            if [ -d "$sub" ]; then
+                loop_dir $sub;
+            else
+                # do something
+            fi
+        done
+    }
+    \end{lstlisting}
+}
+
+
+\section {\ZHH expect的典型用法} {
+    {通过expect完成自动scp的过程参考: }\par
+    \begin{lstlisting}[language=bash]
+    function scp_target()
+    {
+        scp_src="$1";
+        scp_dst="$2";
+        scp_dst_passwd="$3";
+        expect -c "set timeout -1;
+            spawn scp -p -o StrictHostKeyChecking=no -r $scp_src $scp_dst;
+            expect "*assword:*" { send $scp_dst_passwd\r\n; }; 
+            expect eof {exit;}; "
+    }
     \end{lstlisting}
 }
 
