@@ -35,7 +35,8 @@
     rulesepcolor=\color{red!20!green!20!blue!20},
     breaklines,
     basicstyle=\footnotesize,
-    showstringspaces=false
+    showstringspaces=false,
+    escapechar=`
 }
 
 %文章内中文自动换行

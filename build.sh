@@ -13,7 +13,7 @@ FLAG_SCP=1;
 function scp_target()
 {
     scp_src="$1";
-    
+
     # environment varaibles
     pub_host="$VPS_HOST";
     pub_dir="/usr/local/nginx/html";
@@ -22,7 +22,7 @@ function scp_target()
 
     expect -c "set timeout -1;
         spawn scp -p -o StrictHostKeyChecking=no -r $DST/$scp_src $pub_usr@$pub_host:$pub_dir/$scp_src;
-        expect "*assword:*" { send $pub_passwd\r\n; }; 
+        expect "*assword:*" { send $pub_passwd\r\n; };
         expect eof {exit;}; "
 }
 
@@ -50,7 +50,7 @@ function xelatex_pdf()
 # loop data
 function do_xelatex()
 {
-    # all blog files 
+    # all blog files
     if [ $TARGET = "_all" ]; then
         echo -e "start to xelatex all...\n"
         for cat in `ls $SRC`
@@ -86,26 +86,22 @@ function do_xelatex()
 }
 
 # argument --> target
-if [ $# = 1 ]; then
-    TARGET=$1
-else
-    while getopts "d:hn" arg
-    do
-        case $arg in
-            d) echo -e "target: $OPTARG\n"
-               TARGET=$OPTARG
-               ;;
-            n) FLAG_SCP=0
-               ;;
-            h) echo -e "usage:\n\t./build.sh <-d target> <-h> <-n no scp>"
-               exit 1
-               ;;
-            *) echo -e "usage:\n\t./build.sh <-d target> <-h> <-n no scp>"
-               exit 1
-               ;;
-        esac
-    done
-fi
+while getopts "d:hn" arg
+do
+    case $arg in
+        d) echo -e "target: $OPTARG\n"
+           TARGET=$OPTARG
+           ;;
+        n) FLAG_SCP=0
+           ;;
+        h) echo -e "usage:\n\t./build.sh <-d target> <-h> <-n no scp>"
+           exit 1
+           ;;
+        *) echo -e "usage:\n\t./build.sh <-d target> <-h> <-n no scp>"
+           exit 1
+           ;;
+    esac
+done
 
 do_xelatex
 if [ $FLAG_SCP = 1 ]; then

@@ -1,0 +1,172 @@
+\begin {document}
+
+\title {\ZHH \huge 零基础学习ejoy2d——PPM贴图}
+\author {\small gaccob}
+\date {\small 2004 年 2 月 5 日}
+\maketitle
+
+\section {\ZHH PPM贴图格式} {
+    \begin {itemize}
+    \item {PBM, portable bitmap, 单色图(1 bit). }
+    \item {PGM, portable gray map, 灰度图. }
+    \item {PPM, portable pixel map, 真彩图. }
+    \end {itemize}\par
+
+    {PBM / PGM / PPM图像的文件格式分为两部分: 文件头和数据部分. 一个典型PPM头的sample: }\par
+    \begin{lstlisting}[language=bash]
+    p6 # ppm format
+    1024 1024 # height & width
+    255 # depth, could be greater than 255
+    \end{lstlisting}
+
+    {PPM的格式有p3和p6, p3表示用ascii码(文本)来表示数据, p6表示以字节码(二进制)来表示, 每一个像素按(r, g, b)的格式来存储. }\par
+    \begin{lstlisting}[language=bash]
+    P3
+    4 4
+    15
+    0  0  0  0  0  0  0  0  0 15  0 15
+    0  0  0  0 15  7  0  0  0  0  0  0
+    0  0  0  0  0  0  0 15  7  0  0  0
+    15 0 15  0  0  0  0  0  0  0  0  0
+    \end{lstlisting}
+
+    {PGM与PPM类似, 格式有p2和p5, p2表示文本, p5表示二进制.}\par
+    \begin{lstlisting}[language=bash]
+    P2
+    18 7
+    15
+    0 0 0 0 0 0 0 0 0 0 0 0 0  0  0  0  0 0
+    0 3 3 3 3 0 0 7 7 7 7 0 0 11 11 11 11 0
+    0 3 0 0 0 0 0 7 0 0 0 0 0 11  0  0  0 0
+    0 3 3 3 0 0 0 7 7 7 0 0 0 11 11 11  0 0
+    0 3 0 0 0 0 0 7 0 0 0 0 0 11  0  0  0 0
+    0 3 0 0 0 0 0 7 7 7 7 0 0 11 11 11 11 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0  0  0  0  0 0
+    \end{lstlisting}
+
+    {对于PBM来说, 格式为p1, 但是文件头中没有最大颜色, 因为用0和1来表示就可以了.}\par
+    \begin{lstlisting}[language=bash]
+    P1
+    24 7
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    0 1 1 1 1 0 0 1 1 1 1 0 0 1 1 1 1 0 0 1 1 1 1 0
+    0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 1 0
+    0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 1 0
+    0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0
+    0 1 0 0 0 0 0 1 1 1 1 0 0 1 1 1 1 0 0 1 0 0 0 0
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    \end{lstlisting}
+
+    \par{参考文章: \href{http://www.cppblog.com/windcsn/archive/2005/11/11/ppm.html}{http://www.cppblog.com/windcsn/archive/2005/11/11/ppm.html}}
+}
+
+\section{\ZHH ejoy2d中的PPM源码阅读}{
+    {ejoy2d中的PPM贴图的处理都在lib/ppm.h和lib/ppm.c中. ejoy2d中用PGM贴图来描述alpha通道, 用PPM贴图来描述rgb通道. }\par
+    \begin{lstlisting}[language=C]
+    struct ppm {
+        // `指PPM贴图的格式, p1-p6分别对应1-6`
+        int type;
+        // `图像的深度, 一般有255(8位)和15(4位)`
+        int depth;
+        // `步长, alpha是1, rgb是3, rgba就是4`
+        int step;
+        // `长 \& 宽`
+        int width;
+        int height;
+        // `图像数据`
+        uint8_t *buffer;
+    };
+
+    // `载入PPM文件头`
+    static int
+    ppm_header(FILE *f, struct ppm *ppm) {
+        ......
+    }
+
+    // `载入PPM文件数据`
+    // `这里会根据type(p1, p2, ...)的不同, 做对应的解析并载入`
+    // `skip是为了有一个初始offset(适用于rgb ppm载入alpha的情况)`
+    static int
+    ppm_data(struct ppm *ppm, FILE *f, int id, int skip) {
+        ......
+    }
+
+    // `载入PPM文件, 调用ppm\_header()和ppm\_data()完成.`
+    // `如果是rgba, 需要从两个贴图文件一起载入(会做一致性校验)`
+    static int
+    loadppm_from_file(FILE *rgb, FILE *alpha, struct ppm *ppm) {
+        ......
+    }
+
+    // `载入PPM文件的lua接口`
+    // `lua输入参数:`
+    // `     string ppm\_name`
+    // `输出lua结果:`
+    // `     string format(这里约定的格式有: RGBA8, RGB8, ALPHA8, RGBA4, RGB4, ALPHA4)`
+    // `     int width`
+    // `     int height`
+    // `     table buffer(ppm数据部分)`
+    static int
+    loadppm(lua_State *L) {
+        ......
+    }
+
+    // `载入PPM文件到texture(纹理)的lua接口`
+    // `lua输入参数:`
+    // `     string ppm\_name`
+    // `lua输出参数:`
+    // `     TODO: 这个到后面讲texture时再看`
+    static int
+    loadtexture(lua_State *L) {
+        ......
+    }
+
+    // `根据format(上面描述的RGBA8等格式), 设置ppm数据: type, depth, step`
+    static void
+    ppm_type(lua_State *L, const char * format, struct ppm *ppm) {
+        ......
+    }
+
+    // `从lua中读取数据, 保存rgb的PPM贴图(写文件), P6二进制格式.`
+    static void
+    save_rgb(lua_State *L, int step, int depth) {
+        ......
+    }
+
+    // `从lua中读取数据, 保存alpha的PGM贴图(写文件), P5二进制格式.`
+    static void
+    save_alpha(lua_State *L, int step, int depth, int offset) {
+        ......
+    }
+
+    // `保存PPM文件的lua接口, 调用save\_rgb()和save\_alpha()实现.`
+    // `lua输入参数:`
+    // `     string save\_filename(保存的文件名)`
+    // `     string format(同上)`
+    // `     int width`
+    // `     int height`
+    // `     table buffer(ppm数据部分)`
+    // `输出lua结果:`
+    //
+    static int
+    saveppm(lua_State *L) {
+        ......
+    }
+
+    // `lua的导出接口`
+    int
+    ejoy2d_ppm(lua_State *L) {
+        luaL_Reg l[] = {
+            { "texture", loadtexture },
+            { "load", loadppm },
+            { "save", saveppm },
+            { NULL, NULL },
+        };
+        luaL_newlib(L,l);
+        return 1;
+    }
+
+    \end{lstlisting}
+}
+
+\end {document}
