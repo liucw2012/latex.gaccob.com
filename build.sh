@@ -7,8 +7,8 @@ SRC="data";
 DST="publish";
 HEAD="head.macos";
 TMP="_tmp";
-TARGET="_all";
-FLAG_SCP=1;
+TARGET="_null";
+FLAG_SCP=0;
 
 function scp_target()
 {
@@ -51,7 +51,7 @@ function xelatex_pdf()
 function do_xelatex()
 {
     # all blog files
-    if [ $TARGET = "_all" ]; then
+    if [ $TARGET = "all" ]; then
         echo -e "start to xelatex all...\n"
         for cat in `ls $SRC`
         do
@@ -86,22 +86,31 @@ function do_xelatex()
 }
 
 # argument --> target
-while getopts "d:hn" arg
+while getopts "d:ahs" arg
 do
     case $arg in
         d) echo -e "target: $OPTARG\n"
            TARGET=$OPTARG
            ;;
-        n) FLAG_SCP=0
+        a) echo -e "target: all\n"
+           TARGET="all"
            ;;
-        h) echo -e "usage:\n\t./build.sh <-d target> <-h> <-n no scp>"
+        s) FLAG_SCP=1
+           ;;
+        h) echo -e "usage:\n\t./build.sh <-d target> <-a all> <-h> <-s auto scp>"
            exit 1
            ;;
-        *) echo -e "usage:\n\t./build.sh <-d target> <-h> <-n no scp>"
+        *) echo -e "usage:\n\t./build.sh <-d target> <-a all> <-h> <-s auto scp>"
            exit 1
            ;;
     esac
 done
+
+if [ $TARGET = "_null" ]; then
+    echo -e "target not set fail."
+    echo -e "usage:\n\t./build.sh <-d target> <-a all> <-h> <-s auto scp>"
+    exit 1
+fi
 
 do_xelatex
 if [ $FLAG_SCP = 1 ]; then
