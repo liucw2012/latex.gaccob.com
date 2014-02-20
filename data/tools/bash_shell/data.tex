@@ -90,4 +90,16 @@
     \end{lstlisting}
 }
 
+\section {\ZHH 进程锁} {
+    {通过flock实现进程锁, 尤其在执行shell脚本时比较实用, 具体可以参考man page. }\par
+    {一个典型用法如下: }\par
+    \begin{lstlisting}[language=bash]
+    # `non-block (fail exit with code 1), exclusive lock`
+    flock -xn /tmp/test.lock -c test.sh
+
+    # `non-block, wait 5 seconds`
+    flock -n -w 5 /tmp/test.lock -c test.sh
+    \end{lstlisting}
+}
+
 \end{document}
