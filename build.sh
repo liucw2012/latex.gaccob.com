@@ -37,9 +37,11 @@ function xelatex_pdf()
 
     rm -rf "$TMP.tex";
     cat "../../../$HEAD" "data.tex" >> "$TMP.tex";
+
     # do twice to make sure generate reference
     xelatex "$TMP.tex" > /dev/null 2>&1;
     xelatex "$TMP.tex" > /dev/null 2>&1;
+
     mv "$TMP.pdf" "../../../$DST/$cat/$data.pdf";
     rm -rf "$TMP.log" "$TMP.aux" "$TMP.tex" "$TMP.out";
 
@@ -74,6 +76,7 @@ function do_xelatex()
             cat=`echo $TARGET | awk -F"/" '{print $2}'`
             data=`echo $TARGET | awk -F"/" '{print $3}'`
             if [ -d "$src/$cat/$data" ]; then
+                mkdir -p "$DST/$cat";
                 xelatex_pdf "$src" "$cat" "$data"
                 if [ $FLAG_SCP = 1 ]; then
                     scp_target "$cat/$data.pdf"

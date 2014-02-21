@@ -1,0 +1,209 @@
+\begin {document}
+
+\title {\ZHH \huge 学习ejoy2d——shader}
+\author {\small gaccob}
+\date {\small 2014 年 2 月 21 日}
+\maketitle
+
+
+\section* {\ZHH shader简单介绍} {
+    {wiki上这么描述: shader(着色器)指一组供计算机图形资源在执行渲染任务时使用的指令. shader是render的一部分, 运行在GPU上, 负责计算目标颜色. OpenGL从1.5开始继承一种类C的着色语言, 称为OpenGL Shader Language.}\par
+    {shader分两种, 一种是顶点shader(OpenGL中是vertex shader), 目的是计算顶点位置, 为后期像素渲染做准备; 一种是像素shader(OpenGL中是fragment shader), 以像素为单位, 计算光照和颜色. }\par
+}
+
+
+\setion* {\ZHH ejoy2d.shader数据结构} {
+    \begin {lstlisting} [language=C]
+    // `分别是screen 和 texture 的坐标`
+    struct vertex {
+        float vx;
+        float vy;
+        float tx;
+        float ty;
+        uint8_t rgba[4];
+    };
+
+    // `1个quad, 4个顶点`
+    struct quad {
+        struct vertex p[4];
+    };
+
+    // `这个东东处理了所有渲染部分的工作`
+    struct render_state {
+
+        // `当前的shader program`
+        int current_program;
+
+        // `ejoy2d支持最多6种 shader program`
+        struct program program[MAX_PROGRAM];
+
+        // texture id (OpenGL id)
+        int tex;
+
+        // `需要渲染的quad的数量, 在rs_commit()计算时需要用到`
+        int object;
+
+        // `默认的blend方式 (这个下面代码有描述), 该值为0; 自定义blend方式时, 这个值=1`
+        int blendchange;
+
+        // `顶点buffer`
+        GLuint vertex_buffer;
+
+        // `索引buffer`
+        GLuint index_buffer;
+
+        // `最多64个quad`
+        struct quad vb[MAX_COMMBINE];
+    };
+
+    // `全局RS`
+    static struct render_state *RS = NULL;
+    \end {lstlisting}
+}
+
+
+\section* {\ZHH ejoy2d.shader初始化} {
+
+    \begin {lstlisting} [language=C]
+
+    // `初始化shader, 这个会在程序启动时调用`
+    void
+    shader_init() {
+        assert(RS == NULL);
+        struct render_state * rs = (struct render_state *) malloc(sizeof(*rs));
+        memset(rs, 0 , sizeof(*rs));
+        rs->current_program = -1;
+        rs->blendchange = 0;
+
+        // `设置颜色混合的模式`
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+        // `索引buffer`
+        glGenBuffers(1, &rs->index_buffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rs->index_buffer);
+
+        GLubyte idxs[6 * MAX_COMMBINE];
+        int i;
+        for (i=0;i<MAX_COMMBINE;i++) {
+            idxs[i*6] = i*4;
+            idxs[i*6+1] = i*4+1;
+            idxs[i*6+2] = i*4+2;
+            idxs[i*6+3] = i*4;
+            idxs[i*6+4] = i*4+2;
+            idxs[i*6+5] = i*4+3;
+        }
+
+        // `GL_STATIC_DRAW表示数据(idxs)只指定一次, 多次绘制: 索引是固定的`
+        // `上面的索引idxs, 实际上是将quad的4个顶点, 转为两个三角面`
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6*MAX_COMMBINE, idxs, GL_STATIC_DRAW);
+
+        // `顶点buffer, 这里的buffer会在程序运行中实时加载进来`
+        glGenBuffers(1, &rs->vertex_buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, rs->vertex_buffer);
+
+        glEnable(GL_BLEND);
+
+        RS = rs;
+    }
+
+    \end {lstlisting} \par
+
+    {这里值得说一下的是OpenGL的颜色混合方式, 假设源颜色(Rs, Gs, Bs, As), 目标颜色为(Rd, Gd, Bd, Ad), OpenGL分别讲源颜色和目标颜色乘一个系数, 就得到了混合的结果. 这里的系数就由glBlendFunc()指定. }\par
+
+    {第一个参数GL\_ONE表示使用1.0作为源颜色的系数, 第二个参数, GL\_ONE\_MINUS\_SRC\_ALPHA表示以1.0减去As的值作为目标颜色的系数. } \par
+
+    {具体的细节可以参考这一篇文章\href{http://blog.csdn.net/aurora_mylove/article/details/1700540}{颜色混合opengl}, 这里不再赘述. }\par
+
+}
+
+\section* {\ZHH ejoy2d.shader的加载} {
+
+    {在前文讲过, render_state维护了一个预先加载的shader program数组. 可以从shader.lua中读到, 一共是6段shader: sprite_fs, sprite_vs, text_fs, text_edge_fs, gray_fs 以及 color_fs. }\par
+
+    \begin {lstlisting} [language=C]
+
+    // `编译shader代码`
+    static GLuint
+    compile(const char * source, int type) {
+        ......
+    }
+
+    // `链接编译后的shader`
+    static void
+    link(struct program *p) {
+        ......
+    }
+
+    // `如果shader中存在addi, 设置为对应的color值`
+    static void
+    set_color(GLint addi, uint32_t color) {
+        if (addi == -1)
+            return;
+        if (color == 0) {
+            glUniform3f(addi, 0,0,0);
+        } else {
+            float c[3];
+            c[0] = (float)((color >> 16) & 0xff) / 255.0f;
+            c[1] = (float)((color >> 8) & 0xff) / 255.0f;
+            c[2] = (float)(color & 0xff ) / 255.0f;
+            glUniform3f(addi, c[0],c[1],c[2]);
+        }
+    }
+
+    // `加载shader program`
+    static void
+    program_init(struct program * p, const char *FS, const char *VS) {
+        // Create shader program.
+        p->prog = glCreateProgram();
+
+        // `编译FS, 像素shader`
+        GLuint fs = compile(FS, GL_FRAGMENT_SHADER);
+        if (fs == 0) {
+            fault("Can't compile fragment shader");
+        } else {
+            glAttachShader(p->prog, fs);
+        }
+
+        // `编译VS, 顶点shader`
+        GLuint vs = compile(VS, GL_VERTEX_SHADER);
+        if (vs == 0) {
+            fault("Can't compile vertex shader");
+        } else {
+            glAttachShader(p->prog, vs);
+        }
+
+        // `绑定顶点shader中的attribute 到这里的ATRRIB_*变量`
+        // `这里的position, texcoord和color 是sprite\s_vs shader中的attribute`
+        glBindAttribLocation(p->prog, ATTRIB_VERTEX, "position");
+        glBindAttribLocation(p->prog, ATTRIB_TEXTCOORD, "texcoord");
+        glBindAttribLocation(p->prog, ATTRIB_COLOR, "color");
+
+        // `链接`
+        link(p);
+
+        // `获取像素shader中的uniform变量 additive, (一个偏移量, 默认是0)`
+        p->additive = glGetUniformLocation(p->prog, "additive");
+        p->arg = 0;
+        set_color(p->additive, 0);
+
+        // `删除shader`
+        glDetachShader(p->prog, fs);
+        glDeleteShader(fs);
+        glDetachShader(p->prog, vs);
+        glDeleteShader(vs);
+    }
+
+    // `加载shader`
+    void
+    shader_load(int prog, const char *fs, const char *vs) {
+        struct render_state *rs = RS;
+        assert(prog >=0 && prog < MAX_PROGRAM);
+        struct program * p = &rs->program[prog];
+        assert(p->prog == 0);
+        program_init(p, fs, vs);
+    }
+    \end {lstlisting}
+}
+
+
+\end {document}

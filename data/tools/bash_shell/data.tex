@@ -102,4 +102,12 @@
     \end{lstlisting}
 }
 
+\section {\ZHH 绑定cpu} {
+    {在某些情况下, 可以通过绑定server进程到固定的cpu, 减少context切换, 一定程度上提高性能. 这个时候需要用到taskset.}\par
+    {taskset的具体用法可以参照man page, 一个常见的sample如下: }\par
+    \begin{lstlisting}[language=bash]
+    taskset -c 0,2,4-6 -p 14285
+    \end{lstlisting}\par
+}
+
 \end{document}
