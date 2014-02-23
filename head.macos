@@ -30,7 +30,7 @@
 \lstset{ numbers=left,
     numberstyle=\tiny,
     keywordstyle=\color{blue!70},
-    commentstyle=\color{red!50!green!50!blue!50},
+    commentstyle=\color{red!30!green!30!blue!30},
     frame=shadowbox,
     rulesepcolor=\color{red!20!green!20!blue!20},
     breaklines,

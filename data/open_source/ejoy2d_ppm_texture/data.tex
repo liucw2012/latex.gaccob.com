@@ -14,9 +14,9 @@
 
     {pbm / pgm / ppm 图像的文件格式分为两部分: 文件头和数据部分. 一个典型ppm头的sample: }\par
     \begin{lstlisting}[language=bash]
-    p6 # `ppm格式`
-    1024 1024 # `高, 宽`
-    255 # `深度, 不一定就是255`
+    p6 # ` \color{gray} ppm格式`
+    1024 1024 # ` \color{gray} 高, 宽`
+    255 # ` \color{gray} 深度, 不一定就是255`
     \end{lstlisting}
 
     {ppm的格式有p3和p6, p3表示用ascii码(文本)来表示数据, p6表示以字节码(二进制)来表示, 每一个像素按(r, g, b)的格式来存储. }\par
@@ -64,38 +64,38 @@
     {ejoy2d中的ppm贴图的处理都在lib/ppm.h和lib/ppm.c中. ejoy2d中用pgm贴图来描述alpha通道, 用ppm贴图来描述rgb通道. }\par
     \begin{lstlisting}[language=C]
 struct ppm {
-    // `指ppm贴图的格式, p1-p6分别对应1-6`
+    // `\color{gray} 指ppm贴图的格式, p1-p6分别对应1-6`
     int type;
-    // `图像的深度, 一般有255(8位)和15(4位)`
+    // `\color{gray} 图像的深度, 一般有255(8位)和15(4位)`
     int depth;
-    // `步长, alpha是1, rgb是3, rgba就是4`
+    // `\color{gray} 步长, alpha是1, rgb是3, rgba就是4`
     int step;
-    // `长 \& 宽`
+    // `\color{gray} 长 \& 宽`
     int width;
     int height;
-    // `图像数据`
+    // `\color{gray} 图像数据`
     uint8_t *buffer;
 };
 
-// `载入ppm文件头`
+// `\color{gray} 载入ppm文件头`
 static int
 ppm_header(FILE *f, struct ppm *ppm) {
     ......
-    // `格式`
+    // `\color{gray} 格式`
     char c = 0;
     sscanf(line, "P%c", &c);
     ......
-    // `长 \& 宽`
+    // `\color{gray} 长 \& 宽`
     sscanf(line, "%d %d", &(ppm->width), &(ppm->height));
     ......
-    // `图像深度, 这里就是255或者15`
+    // `\color{gray} 图像深度, 这里就是255或者15`
     sscanf(line, "%d", &(ppm->depth));
     .......
 }
 
-// `载入ppm文件数据`
-// `这里会根据type(p1, p2, ...)的不同, 做对应的解析并载入`
-// `skip是为了有一个初始offset(适用于rgb ppm载入alpha的情况)`
+// `\color{gray} 载入ppm文件数据`
+// `\color{gray} 这里会根据type(p1, p2, ...)的不同, 做对应的解析并载入`
+// `\color{gray} skip是为了有一个初始offset(适用于rgb ppm载入alpha的情况)`
 static int
 ppm_data(struct ppm *ppm, FILE *f, int id, int skip) {
     ......
@@ -111,35 +111,35 @@ ppm_data(struct ppm *ppm, FILE *f, int id, int skip) {
     }
 }
 
-// `载入ppm文件, 调用ppm\_header()和ppm\_data()完成.`
-// `如果是rgba, 需要从两个贴图文件一起载入(会做一致性校验)`
+// `\color{gray} 载入ppm文件, 调用ppm\_header()和ppm\_data()完成.`
+// `\color{gray} 如果是rgba, 需要从两个贴图文件一起载入(会做一致性校验)`
 static int
 loadppm_from_file(FILE *rgb, FILE *alpha, struct ppm *ppm) {
     ......
 }
 
-// `载入ppm文件的lua接口`
-// `lua输入参数:`
-// `     string ppm\_name`
-// `输出lua结果:`
-// `     string format(这里约定的格式有: RGBA8, RGB8, ALPHA8, RGBA4, RGB4, ALPHA4)`
-// `     int width`
-// `     int height`
-// `     table buffer(ppm数据部分)`
+// `\color{gray} 载入ppm文件的lua接口`
+// `\color{gray} lua输入参数:`
+// `\color{gray}      string ppm\_name`
+// `\color{gray} 输出lua结果:`
+// `\color{gray}      string format(这里约定的格式有: RGBA8, RGB8, ALPHA8, RGBA4, RGB4, ALPHA4)`
+// `\color{gray}      int width`
+// `\color{gray}      int height`
+// `\color{gray}      table buffer(ppm数据部分)`
 static int
 loadppm(lua_State *L) {
     ......
 }
 
-// `载入ppm文件到texture(纹理)的lua接口`
-// `lua输入参数:`
-// `     string ppm\_name`
+// `\color{gray} 载入ppm文件到texture(纹理)的lua接口`
+// `\color{gray} lua输入参数:`
+// `\color{gray}      string ppm\_name`
 static int
 loadtexture(lua_State *L) {
-    // `载入ppm文件, 调用loadppm\_from\_file()完成`
+    // `\color{gray} 载入ppm文件, 调用loadppm\_from\_file()完成`
     ......
 
-    // `根据ppm的格式, 设置texture的格式`
+    // `\color{gray} 根据ppm的格式, 设置texture的格式`
     int type = 0;
     if (ppm.depth == 255) {
         if (ppm.step == 4) {
@@ -150,7 +150,7 @@ loadtexture(lua_State *L) {
             type = Texture2DPixelFormat_A8;
         }
     }
-    // `depth为15, 需要根据step的不同(即texture格式的不同)做buffer的转换`
+    // `\color{gray} depth为15, 需要根据step的不同(即texture格式的不同)做buffer的转换`
     else {
         if (ppm.step == 4) {
             ......
@@ -161,7 +161,7 @@ loadtexture(lua_State *L) {
         }
     }
 
-    // `最后加载texture, 这一块具体可以参照下节`
+    // `\color{gray} 最后加载texture, 这一块具体可以参照下节`
     const char * err = texture_load(id, type, ppm.width, ppm.height, ppm.buffer);
     free(ppm.buffer);
     if (err) {
@@ -170,37 +170,37 @@ loadtexture(lua_State *L) {
     return 0;
 }
 
-// `根据format(上面描述的RGBA8等格式), 设置ppm数据: type, depth, step`
+// `\color{gray} 根据format(上面描述的RGBA8等格式), 设置ppm数据: type, depth, step`
 static void
 ppm_type(lua_State *L, const char * format, struct ppm *ppm) {
     ......
 }
 
-// `从lua中读取数据, 保存rgb的ppm贴图(写文件), P6二进制格式.`
+// `\color{gray} 从lua中读取数据, 保存rgb的ppm贴图(写文件), P6二进制格式.`
 static void
 save_rgb(lua_State *L, int step, int depth) {
     ......
 }
 
-// `从lua中读取数据, 保存alpha的pgm贴图(写文件), P5二进制格式.`
+// `\color{gray} 从lua中读取数据, 保存alpha的pgm贴图(写文件), P5二进制格式.`
 static void
 save_alpha(lua_State *L, int step, int depth, int offset) {
     ......
 }
 
-// `保存ppm文件的lua接口, 调用save\_rgb()和save\_alpha()实现, 写文件.`
-// `lua输入参数:`
-// `     string save\_filename(保存的文件名)`
-// `     string format(同上)`
-// `     int width`
-// `     int height`
-// `     table buffer(ppm数据部分)`
+// `\color{gray} 保存ppm文件的lua接口, 调用save\_rgb()和save\_alpha()实现, 写文件.`
+// `\color{gray} lua输入参数:`
+// `\color{gray}      string save\_filename(保存的文件名)`
+// `\color{gray}      string format(同上)`
+// `\color{gray}      int width`
+// `\color{gray}      int height`
+// `\color{gray}      table buffer(ppm数据部分)`
 static int
 saveppm(lua_State *L) {
     ......
 }
 
-// `lua的导出接口`
+// `\color{gray} lua的导出接口`
 int
 ejoy2d_ppm(lua_State *L) {
     luaL_Reg l[] = {
@@ -248,7 +248,7 @@ ejoy2d_ppm(lua_State *L) {
 \section* {\ZHH \Large ejoy2d中的texture源码}{
     {ejoy2d中关于texture的代码大部分都在lib/texture.h和lib/texture.c中. }\par
     \begin{lstlisting}[language=C]
-// `这是ejoy2d支持的纹理格式`
+// `\color{gray} 这是ejoy2d支持的纹理格式`
 #define Texture2DPixelFormat_RGBA8888 1
 #define Texture2DPixelFormat_RGBA4444 2
 #define Texture2DPixelFormat_PVRTC4 3
@@ -257,7 +257,7 @@ ejoy2d_ppm(lua_State *L) {
 #define Texture2DPixelFormat_RGB565 6
 #define Texture2DPixelFormat_A8 7
 
-// `这是texture对象, 这里的id就是OpenGL的句柄, invw和invh避免了做除法`
+// `\color{gray} 这是texture对象, 这里的id就是OpenGL的句柄, invw和invh避免了做除法`
 struct texture {
     int width;
     int height;
@@ -266,42 +266,42 @@ struct texture {
     GLuint id;
 };
 
-// `内存池来管理纹理对象, 默认最大128对象`
+// `\color{gray} 内存池来管理纹理对象, 默认最大128对象`
 struct texture_pool {
     int count;
     struct texture tex[MAX_TEXTURE];
 };
 static struct texture_pool POOL;
 
-// `从数据(一般是贴图)加载纹理`
+// `\color{gray} 从数据(一般是贴图)加载纹理`
 const char *
 texture_load(int id, int pixel_format, int pixel_width, int pixel_height, void *data) {
     ......
 
-    // `OpenGL创建texture`
+    // `\color{gray} OpenGL创建texture`
     glGenTextures(1, &tex->id);
 
-    // `指定当前的纹理单元`
+    // `\color{gray} 指定当前的纹理单元`
     glActiveTexture(GL_TEXTURE0);
 
-    // `这里shader会调用glBindTexture()绑定纹理`
+    // `\color{gray} 这里shader会调用glBindTexture()绑定纹理`
     shader_texture(tex->id);
 
-    // `缩小|放大过滤器, 线性滤波`
+    // `\color{gray} 缩小|放大过滤器, 线性滤波`
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    // `GL\_CLAMP\_TO\_EDGE使得超出边缘的部分与边缘保持一致, 有个学名叫"箝位"`
+    // `\color{gray} GL\_CLAMP\_TO\_EDGE使得超出边缘的部分与边缘保持一致, 有个学名叫"箝位"`
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
-    // `根据纹理格式来分别加载数据`
+    // `\color{gray} 根据纹理格式来分别加载数据`
     switch(pixel_format) {
          ......
     }
     return NULL;
 }
 
-// `卸载(删除)纹理对象`
+// `\color{gray} 卸载(删除)纹理对象`
 void
 texture_unload(int id) {
     if (id < 0 || id >= POOL.count)
@@ -309,12 +309,12 @@ texture_unload(int id) {
     struct texture *tex = &POOL.tex[id];
     if (tex->id == 0)
         return;
-    // `从OpenGL中删除纹理对象`
+    // `\color{gray} 从OpenGL中删除纹理对象`
     glDeleteTextures(1,&tex->id);
     tex->id = 0;
 }
 
-// `纹理的坐标系转换`
+// `\color{gray} 纹理的坐标系normalize`
 void
 texture_coord(int id, float *x, float *y) {
     if (id < 0 || id >= POOL.count) {
@@ -322,7 +322,7 @@ texture_coord(int id, float *x, float *y) {
         return;
     }
     struct texture *tex = &POOL.tex[id];
-    // `相当于 x/texture\_x, y/texture\_y, 这里的用法后面看sprite的时候再看`
+    // `\color{gray} 相当于 x/texture\_x, y/texture\_y, 实际上就是normalize到0~1.0`
     *x *= tex->invw;
     *y *= tex->invh;
 }

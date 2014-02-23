@@ -6,15 +6,15 @@
 \maketitle
 
 
-\section* {\ZHH shader简单介绍} {
+\section {\ZHH shader简单介绍} {
     {wiki上这么描述: shader(着色器)指一组供计算机图形资源在执行渲染任务时使用的指令. shader是render的一部分, 运行在GPU上, 负责计算目标颜色. OpenGL从1.5开始继承一种类C的着色语言, 称为OpenGL Shader Language.}\par
     {shader分两种, 一种是顶点shader(OpenGL中是vertex shader), 目的是计算顶点位置, 为后期像素渲染做准备; 一种是像素shader(OpenGL中是fragment shader), 以像素为单位, 计算光照和颜色. }\par
 }
 
 
-\setion* {\ZHH ejoy2d.shader数据结构} {
-    \begin {lstlisting} [language=C]
-    // `分别是screen 和 texture 的坐标`
+\section {\ZHH ejoy2d.shader数据结构} {
+    \begin{lstlisting}[language=C]
+    // `\color{gray} 分别是screen 和 texture 的坐标`
     struct vertex {
         float vx;
         float vy;
@@ -23,62 +23,63 @@
         uint8_t rgba[4];
     };
 
-    // `1个quad, 4个顶点`
+    // `\color{gray} 1个quad, 4个顶点`
     struct quad {
         struct vertex p[4];
     };
 
-    // `这个东东处理了所有渲染部分的工作`
+    // `\color{gray} 这个东东处理了所有渲染部分的工作`
     struct render_state {
 
-        // `当前的shader program`
+        // `\color{gray} 当前的shader program`
         int current_program;
 
-        // `ejoy2d支持最多6种 shader program`
+        // `\color{gray} ejoy2d支持最多6种 shader program, 这个会在lua中定义`
         struct program program[MAX_PROGRAM];
 
         // texture id (OpenGL id)
         int tex;
 
-        // `需要渲染的quad的数量, 在rs_commit()计算时需要用到`
+        // `\color{gray} 需要渲染的quad的数量, 在rs\_commit()计算时需要用到`
         int object;
 
-        // `默认的blend方式 (这个下面代码有描述), 该值为0; 自定义blend方式时, 这个值=1`
+        // `\color{gray} 默认的blend方式 (这个下面代码有描述), 该值为0; 自定义blend方式时, 这个值=1`
         int blendchange;
 
-        // `顶点buffer`
+        // `\color{gray} 顶点buffer`
         GLuint vertex_buffer;
 
-        // `索引buffer`
+        // `\color{gray} 索引buffer`
         GLuint index_buffer;
 
-        // `最多64个quad`
+        // `\color{gray} 最多64个quad`
         struct quad vb[MAX_COMMBINE];
     };
 
-    // `全局RS`
+    // `\color{gray} 全局渲染状态机`
     static struct render_state *RS = NULL;
-    \end {lstlisting}
+    \end{lstlisting}
 }
 
 
-\section* {\ZHH ejoy2d.shader初始化} {
+\section {\ZHH ejoy2d.shader初始化} {
 
-    \begin {lstlisting} [language=C]
+    \begin{lstlisting}[language=C]
 
-    // `初始化shader, 这个会在程序启动时调用`
+    // `\color{gray} 初始化shader, 这个会在程序启动时调用`
     void
     shader_init() {
         assert(RS == NULL);
         struct render_state * rs = (struct render_state *) malloc(sizeof(*rs));
         memset(rs, 0 , sizeof(*rs));
         rs->current_program = -1;
-        rs->blendchange = 0;
 
-        // `设置颜色混合的模式`
+        // `\color{gray} 设置颜色混合的模式`
+        // `\color{gray} ejoy2d还提供了shader\_defaultblend()和shader\_blend()接口来操作blend方式`
+        rs->blendchange = 0;
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-        // `索引buffer`
+        // `\color{gray} 索引buffer`
         glGenBuffers(1, &rs->index_buffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rs->index_buffer);
 
@@ -93,11 +94,11 @@
             idxs[i*6+5] = i*4+3;
         }
 
-        // `GL_STATIC_DRAW表示数据(idxs)只指定一次, 多次绘制: 索引是固定的`
-        // `上面的索引idxs, 实际上是将quad的4个顶点, 转为两个三角面`
+        // `\color{gray} GL\_STATIC\_DRAW表示索引是固定的`
+        // `\color{gray} 上面的索引idxs, 实际上是将quad的4个顶点, 转为两个三角面, 节约了2个冗余顶点`
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6*MAX_COMMBINE, idxs, GL_STATIC_DRAW);
 
-        // `顶点buffer, 这里的buffer会在程序运行中实时加载进来`
+        // `\color{gray} 顶点buffer, 这里的buffer会在程序运行中实时加载进来`
         glGenBuffers(1, &rs->vertex_buffer);
         glBindBuffer(GL_ARRAY_BUFFER, rs->vertex_buffer);
 
@@ -106,35 +107,55 @@
         RS = rs;
     }
 
-    \end {lstlisting} \par
+    \end{lstlisting} \par
 
     {这里值得说一下的是OpenGL的颜色混合方式, 假设源颜色(Rs, Gs, Bs, As), 目标颜色为(Rd, Gd, Bd, Ad), OpenGL分别讲源颜色和目标颜色乘一个系数, 就得到了混合的结果. 这里的系数就由glBlendFunc()指定. }\par
 
     {第一个参数GL\_ONE表示使用1.0作为源颜色的系数, 第二个参数, GL\_ONE\_MINUS\_SRC\_ALPHA表示以1.0减去As的值作为目标颜色的系数. } \par
 
-    {具体的细节可以参考这一篇文章\href{http://blog.csdn.net/aurora_mylove/article/details/1700540}{颜色混合opengl}, 这里不再赘述. }\par
+    {具体的细节可以参考这一篇文章\href{http://blog.csdn.net/aurora_mylove/article/details/1700540}{《颜色混合opengl》}, 这里不再赘述. }\par
 
 }
 
-\section* {\ZHH ejoy2d.shader的加载} {
+\section {\ZHH ejoy2d.shader的加载} {
 
-    {在前文讲过, render_state维护了一个预先加载的shader program数组. 可以从shader.lua中读到, 一共是6段shader: sprite_fs, sprite_vs, text_fs, text_edge_fs, gray_fs 以及 color_fs. }\par
+    {在前文讲过, render\_state维护了一个预先加载的shader program数组. 可以从shader.lua中读到, shader程序有: sprite\_fs, sprite\_vs, text\_fs, text\_edge\_fs, gray\_fs 以及 color\_fs, fs和vs组合后有5种shader. }\par
 
-    \begin {lstlisting} [language=C]
+    \begin{lstlisting}[language=lua]
+    -- `\color{gray} lua 中的shader name`
+    local shader_name = {
+        NORMAL = 0,
+        TEXT = 1,
+        EDGE = 2,
+        GRAY = 3,
+        COLOR = 4,
+    }
 
-    // `编译shader代码`
+    -- `\color{gray} 在init时加载全部5种shader`
+    function shader.init()
+        s.load(shader_name.NORMAL, PRECISION .. sprite_fs, PRECISION .. sprite_vs)
+        s.load(shader_name.TEXT, PRECISION .. text_fs, PRECISION .. sprite_vs)
+        s.load(shader_name.EDGE, PRECISION .. text_edge_fs, PRECISION .. sprite_vs)
+        s.load(shader_name.GRAY, PRECISION .. gray_fs, PRECISION .. sprite_vs)
+        s.load(shader_name.COLOR, PRECISION .. color_fs, PRECISION .. sprite_vs)
+    end
+    \end{lstlisting}
+
+    \begin{lstlisting}[language=C]
+
+    // `\color{gray} 编译shader代码`
     static GLuint
     compile(const char * source, int type) {
         ......
     }
 
-    // `链接编译后的shader`
+    // `\color{gray} 链接编译后的shader`
     static void
     link(struct program *p) {
         ......
     }
 
-    // `如果shader中存在addi, 设置为对应的color值`
+    // `\color{gray} 如果shader中存在addi, 设置为对应的color值`
     static void
     set_color(GLint addi, uint32_t color) {
         if (addi == -1)
@@ -150,13 +171,13 @@
         }
     }
 
-    // `加载shader program`
+    // `\color{gray} 加载shader program`
     static void
     program_init(struct program * p, const char *FS, const char *VS) {
         // Create shader program.
         p->prog = glCreateProgram();
 
-        // `编译FS, 像素shader`
+        // `\color{gray} 编译FS, 像素shader`
         GLuint fs = compile(FS, GL_FRAGMENT_SHADER);
         if (fs == 0) {
             fault("Can't compile fragment shader");
@@ -164,7 +185,7 @@
             glAttachShader(p->prog, fs);
         }
 
-        // `编译VS, 顶点shader`
+        // `\color{gray} 编译VS, 顶点shader`
         GLuint vs = compile(VS, GL_VERTEX_SHADER);
         if (vs == 0) {
             fault("Can't compile vertex shader");
@@ -172,28 +193,29 @@
             glAttachShader(p->prog, vs);
         }
 
-        // `绑定顶点shader中的attribute 到这里的ATRRIB_*变量`
-        // `这里的position, texcoord和color 是sprite\s_vs shader中的attribute`
+        // `\color{gray} 绑定顶点shader中的attribute 到这里的ATRRIB\_*变量`
+        // `\color{gray} 这里的position, texcoord和color 是sprites\_vs shader中的attribute`
         glBindAttribLocation(p->prog, ATTRIB_VERTEX, "position");
         glBindAttribLocation(p->prog, ATTRIB_TEXTCOORD, "texcoord");
         glBindAttribLocation(p->prog, ATTRIB_COLOR, "color");
 
-        // `链接`
+        // `\color{gray} 链接`
         link(p);
 
-        // `获取像素shader中的uniform变量 additive, (一个偏移量, 默认是0)`
+        // `\color{gray} 获取像素shader中的uniform变量 additive, (一个偏移量, 默认是0)`
         p->additive = glGetUniformLocation(p->prog, "additive");
         p->arg = 0;
         set_color(p->additive, 0);
 
-        // `删除shader`
+        // `\color{gray} 删除shader, link完之后, fs和vs就不用了.`
+        // `\color{gray} 跟平时c的编译其实很类似, link成lib或者bin之后, .o文件就不用了.`
         glDetachShader(p->prog, fs);
         glDeleteShader(fs);
         glDetachShader(p->prog, vs);
         glDeleteShader(vs);
     }
 
-    // `加载shader`
+    // `\color{gray} 加载shader程序`
     void
     shader_load(int prog, const char *fs, const char *vs) {
         struct render_state *rs = RS;
@@ -202,8 +224,238 @@
         assert(p->prog == 0);
         program_init(p, fs, vs);
     }
-    \end {lstlisting}
+
+    // `\color{gray} 卸载shader`
+    // `\color{gray} 其实我认为不仅是unload 还有release 为什么不写成两个函数呢? `
+    void
+    shader_unload() {
+        if (RS == NULL) {
+            return;
+        }
+        int i;
+
+        // `\color{gray} 卸载所有的shader程序`
+        for (i=0;i<MAX_PROGRAM;i++) {
+            struct program * p = &RS->program[i];
+            if (p->prog) {
+                glDeleteProgram(p->prog);
+            }
+        }
+
+        // `\color{gray} 删除顶点buffer和索引buffer`
+        glDeleteBuffers(1,&RS->vertex_buffer);
+        glDeleteBuffers(1,&RS->index_buffer);
+
+        // `\color{gray} 释放全局渲染状态机`
+        free(RS);
+        RS = NULL;
+    }
+
+    \end{lstlisting}
 }
 
+\section {\ZHH ejoy2d.shader的渲染} {
+
+    {ejoy2d中用了OpenGL的VAO来做渲染, 具体的细节可以参考这一片文章 \href{http://www.cppblog.com/init/archive/2012/02/21/166098.html}{《OpenGL.Vertex Array Object (VAO)》}. }\par
+
+    \begin{lstlisting}[language=C]
+    // `\color{gray} 渲染的过程, 这里对quad利用索引buffer做了一些优化(节省了冗余的vertex)`
+    static void
+    rs_commit() {
+        if (RS->object == 0)
+            return;
+
+        // `\color{gray} 顶点buffer, GL\_DYNAMIC\_DRAW说明这里每一帧可能会渲染多次`
+        glBindBuffer(GL_ARRAY_BUFFER, RS->vertex_buffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(struct quad) * RS->object, RS->vb, GL_DYNAMIC_DRAW);
+
+        // `\color{gray} 指定ATTRIB\_VERTEX -> shader中的position`
+        // `\color{gray} 2个float, 间隔一个struct vertex, offset=0, 对应vertex->vx, vertex->vy`
+        glEnableVertexAttribArray(ATTRIB_VERTEX);
+        glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), BUFFER_OFFSET(0));
+
+        // `\color{gray} 指定ATTRIB\_TEXTCOORD -> shader中的texcoord`
+        // `\color{gray} 2个float, 间隔一个struct vertex, offset=8=2*sizeof(GL\_FLOAT) 对应vertex->tx, vertex->ty`
+        glEnableVertexAttribArray(ATTRIB_TEXTCOORD);
+        glVertexAttribPointer(ATTRIB_TEXTCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), BUFFER_OFFSET(8));
+
+        // `\color{gray} 指定ATTRIB\_COLOR -> shader中的color`
+        // `\color{gray} 4个unsigned byte, 间隔一个struct vertex, offset=16=4*sizeof(GL\_FLOAT) 对应vertex->rgba`
+        glEnableVertexAttribArray(ATTRIB_COLOR);
+        glVertexAttribPointer(ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(struct vertex), BUFFER_OFFSET(16));
+
+        // `\color{gray} 使用顶点buffer绘制, count=6*object, 与索引buffer一致`
+        glDrawElements(GL_TRIANGLES, 6 * RS->object, GL_UNSIGNED_BYTE, 0);
+        RS->object = 0;
+    }
+
+    // `\color{gray} 渲染一个quad`
+    void
+    shader_draw(const float vb[16], uint32_t color) {
+        struct quad *q = RS->vb + RS->object;
+        int i;
+        for (i=0;i<4;i++) {
+            q->p[i].vx = vb[i*4+0];
+            q->p[i].vy = vb[i*4+1];
+            q->p[i].tx = vb[i*4+2];
+            q->p[i].ty = vb[i*4+3];
+            q->p[i].rgba[0] = (color >> 16) & 0xff;
+            q->p[i].rgba[1] = (color >> 8) & 0xff;
+            q->p[i].rgba[2] = (color) & 0xff;
+            q->p[i].rgba[3] = (color >> 24) & 0xff;
+        }
+        if (++RS->object >= MAX_COMMBINE) {
+            rs_commit();
+        }
+    }
+
+
+    // `\color{gray} 渲染一个polygon, 这里调用glDrawArrays(GL\_TRIANGLE\_FAN, ...)来实现绘制`
+    // `\color{gray} GL\_TRIANGLE\_FAN与GL\_TRIANGLE\_STRIP的区别, 可以参考\href{http://blog.csdn.net/xiajun07061225/article/details/7455283}{这篇文章}`
+    void
+    shader_drawpolygon(int n, const float *vb, uint32_t color) {
+        rs_commit();
+        struct vertex p[n];
+        int i;
+        for (i=0;i<n;i++) {
+            p[i].vx = vb[i*4+0];
+            p[i].vy = vb[i*4+1];
+            p[i].tx = vb[i*4+2];
+            p[i].ty = vb[i*4+3];
+            p[i].rgba[0] = (color >> 16) & 0xff;
+            p[i].rgba[1] = (color >> 8) & 0xff;
+            p[i].rgba[2] = (color) & 0xff;
+            p[i].rgba[3] = (color >> 24) & 0xff;
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, RS->vertex_buffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(struct vertex) * n, (void*)p, GL_DYNAMIC_DRAW);
+
+        glEnableVertexAttribArray(ATTRIB_VERTEX);
+        glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), BUFFER_OFFSET(0));
+        glEnableVertexAttribArray(ATTRIB_TEXTCOORD);
+        glVertexAttribPointer(ATTRIB_TEXTCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), BUFFER_OFFSET(8));
+        glEnableVertexAttribArray(ATTRIB_COLOR);
+        glVertexAttribPointer(ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(struct vertex), BUFFER_OFFSET(16));
+        glDrawArrays(GL_TRIANGLE_FAN, 0, n);
+    }
+
+    \end{lstlisting}
+}
+
+\section {\ZHH ejoy2d.shader的lua接口} {
+
+    {shader的lua接口代码, 都在lib/lshader.c中. }\par
+
+    \begin{lstlisting}[language=C]
+    int
+    ejoy2d_shader(lua_State *L) {
+        luaL_Reg l[] = {
+            {"load", lload},
+            {"unload", lunload},
+            {"draw", ldraw},
+            {"blend", lblend},
+            {"version", lversion},
+            {NULL,NULL},
+        };
+        luaL_newlib(L,l);
+        return 1;
+    }
+    \end{lstlisting}
+
+    {这里基本就是从lua读参数, 然后调用C接口实现, 源码很清晰, 就不列举了. 单独说一下shader.draw这个接口.}\par
+
+    \begin{lstlisting}[language=C]
+    // `\color{gray} 栈里的lua参数:`
+    // `\color{gray}     int texture`
+    // `\color{gray}     table float[16]: 先texture(tx,ty)列表 再screen(vx, vy)列表`
+    // `\color{gray}     uint32\_t color`
+    // `\color{gray}     uint32\_t additive`
+    static int
+    ldraw(lua_State *L) {
+        int tex = (int)luaL_checkinteger(L,1);
+        int texid = texture_glid(tex);
+        if (texid == 0) {
+            lua_pushboolean(L,0);
+            return 1;
+        }
+        luaL_checktype(L, 2, LUA_TTABLE);
+        uint32_t color = 0xffffffff;
+
+        if (!lua_isnoneornil(L,3)) {
+            color = (uint32_t)lua_tounsigned(L,3);
+        }
+
+        // `\color{gray} 设置program和additive`
+        uint32_t additive = (uint32_t)luaL_optunsigned(L,4,0);
+        shader_program(PROGRAM_PICTURE,additive);
+
+        // `\color{gray} 设置texture`
+        shader_texture(texid);
+
+        // `\color{gray} 每个vertex有vx,vy,tx,ty, 所以必然是4的倍数`
+        int n = lua_rawlen(L, 2);
+        int point = n/4;
+        if (point * 4 != n) {
+            return luaL_error(L, "Invalid polygon");
+        }
+
+        float vb[n];
+        int i;
+        for (i=0;i<point;i++) {
+            // `\color{gray} get (tx, ty) (vx, vy)`
+            lua_rawgeti(L, 2, i*2+1);
+            lua_rawgeti(L, 2, i*2+2);
+            lua_rawgeti(L, 2, point*2+i*2+1);
+            lua_rawgeti(L, 2, point*2+i*2+2);
+            float tx = lua_tonumber(L, -4);
+            float ty = lua_tonumber(L, -3);
+            float vx = lua_tonumber(L, -2);
+            float vy = lua_tonumber(L, -1);
+            lua_pop(L,4);
+
+            // `\color{gray} screen 坐标系 normalize`
+            screen_trans(&vx,&vy);
+
+            // `\color{gray} texture 坐标系 normalize`
+            texture_coord(tex, &tx, &ty);
+
+            // `\color{gray} 这个是为了坐标系对齐, screen坐标系原点(0, 0)是屏幕中间, 现在调整到左下角`
+            vb[i*4+0] = vx + 1.0f;
+            vb[i*4+1] = vy - 1.0f;
+            vb[i*4+2] = tx;
+            vb[i*4+3] = ty;
+        }
+
+        // quad
+        if (point == 4) {
+            shader_draw(vb, color);
+        }
+        // polygon
+        else {
+            shader_drawpolygon(point, vb, color);
+        }
+        return 0;
+    }
+    \end{lstlisting}
+}
+
+\section {\ZHH ejoy2d.shader的sample} {
+    {可以参考examples/ex02.lua. }\par
+    \begin{lstlisting}[language=lua]
+
+    local shader = require "ejoy2d.shader"
+
+    -- ` \color{gray} 这里是直接调用shader绘制的sample, 注意一下这里屏幕坐标的中心原点`
+    function game.drawframe()
+	-- use shader.draw to draw a polygon to screen (for debug use)
+	shader.draw(TEXID, {
+		88, 0, 88, 45, 147, 45, 147, 0,	-- texture coord
+		-958, -580, -958, 860, 918, 860, 918, -580, -- screen coord, 16x pixel, (0,0) is the center of screen
+	})
+end
+
+    \end{lstlisting}
+}
 
 \end {document}
