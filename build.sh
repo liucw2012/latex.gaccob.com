@@ -118,4 +118,5 @@ fi
 do_xelatex
 if [ $FLAG_SCP = 1 ]; then
     scp_target "index.html"
+    scp_target "rss.xml"
 fi

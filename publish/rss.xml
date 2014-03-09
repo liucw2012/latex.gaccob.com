@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf8" ?>
+<rss version="2.0">
+<channel>
+    <title>gaccob的blog</title>
+    <description>gaccob的blog</description>
+    <link>http://latex.gaccob.com</link>
+    <item>
+        <title>一致性哈希</title>
+        <link>http://latex.gaccob.com/algorithm/consistant_hash.pdf</link>
+    </item>
+    <item>
+        <title>敏感词过滤</title>
+        <link>http://latex.gaccob.com/game_dev/dirty_words.pdf</link>
+    </item>
+    <item>
+        <title>雪崩与过载保护</title>
+        <link>http://latex.gaccob.com/game_dev/overload.pdf</link>
+    </item>
+    <item>
+        <title>编码标准</title>
+        <link>http://latex.gaccob.com/game_dev/encode.pdf</link>
+    </item>
+    <item>
+        <title>单点服务与热备机制</title>
+        <link>http://latex.gaccob.com/game_dev/hot_standby.pdf</link>
+    </item>
+    <item>
+        <title>从手机到internet</title>
+        <link>http://latex.gaccob.com/mobile/from_mobile_to_internet.pdf</link>
+    </item>
+    <item>
+        <title>tcp的状态</title>
+        <link>http://latex.gaccob.com/network/tcp_status.pdf</link>
+    </item>
+    <item>
+        <title>学习ejoy2d——matrix</title>
+        <link>http://latex.gaccob.com/open_source/ejoy2d_matrix.pdf</link>
+    </item>
+    <item>
+        <title>学习ejoy2d——ppm和texture</title>
+        <link>http://latex.gaccob.com/open_source/ejoy2d_ppm_texture.pdf</link>
+    </item>
+    <item>
+        <title>学习ejoy2d——shader</title>
+        <link>http://latex.gaccob.com/open_source/ejoy2d_shader.pdf</link>
+    </item>
+    <item>
+        <title>UML类图关系整理</title>
+        <link>http://latex.gaccob.com/tools/uml_class.pdf</link>
+    </item>
+    <item>
+        <title>常用bash shell整理</title>
+        <link>http://latex.gaccob.com/tools/bash_shell.pdf</link>
+    </item>
+    <item>
+        <title>CMake使用</title>
+        <link>http://latex.gaccob.com/tools/cmake.pdf</link>
+    </item>
+    <item>
+        <title>git使用</title>
+        <link>http://latex.gaccob.com/tools/git.pdf</link>
+    </item>
+</channel>
+</rss>
