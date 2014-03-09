@@ -89,7 +89,7 @@ function do_xelatex()
 }
 
 # argument --> target
-while getopts "d:ahs" arg
+while getopts "d:ahsi" arg
 do
     case $arg in
         d) echo -e "target: $OPTARG\n"
@@ -100,10 +100,14 @@ do
            ;;
         s) FLAG_SCP=1
            ;;
-        h) echo -e "usage:\n\t./build.sh <-d target> <-a all> <-h> <-s auto scp>"
+        i) scp_target "index.html"
+           scp_target "rss.xml"
            exit 1
            ;;
-        *) echo -e "usage:\n\t./build.sh <-d target> <-a all> <-h> <-s auto scp>"
+        h) echo -e "usage:\n\t./build.sh <-d target> <-a all> <-h> <-s auto scp> <-i update index&rss only>"
+           exit 1
+           ;;
+        *) echo -e "usage:\n\t./build.sh <-d target> <-a all> <-h> <-s auto scp> <-i update index&rss only>"
            exit 1
            ;;
     esac

@@ -5,6 +5,10 @@
     <description>gaccob的blog</description>
     <link>http://latex.gaccob.com</link>
     <item>
+        <title>单点服务与热备机制</title>
+        <link>http://latex.gaccob.com/game_dev/hot_standby.pdf</link>
+    </item>
+    <item>
         <title>一致性哈希</title>
         <link>http://latex.gaccob.com/algorithm/consistant_hash.pdf</link>
     </item>
@@ -19,10 +23,6 @@
     <item>
         <title>编码标准</title>
         <link>http://latex.gaccob.com/game_dev/encode.pdf</link>
-    </item>
-    <item>
-        <title>单点服务与热备机制</title>
-        <link>http://latex.gaccob.com/game_dev/hot_standby.pdf</link>
     </item>
     <item>
         <title>从手机到internet</title>
