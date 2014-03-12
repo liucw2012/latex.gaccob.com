@@ -15,29 +15,29 @@
     \end{itemize} \par
     { 一个简单的使用sample: }\par
     \gaccobsplitinv
-    \begin{lstlisting}[language=bash]
-    for arg in "$@"
-    do
-        echo $arg
-    done
-    \end{lstlisting}
+\begin{lstlisting}[language=bash]
+for arg in "$@"
+do
+    echo $arg
+done
+\end{lstlisting}
 
     \gaccobsplitinv
 
     { \textcolor{blue}{getopts的处理方式}: }\par
     { (这里只讨论短选项, 长选项需要getopt, 会复杂一些). } \par
     \gaccobsplitinv
-    \begin{lstlisting}[language=bash]
-    while getopts "a:bc" arg
-    do
-        case $arg in
-            a) echo -e "argument a: $OPTARG\n" ;;
-            b) echo -e "argument b\n" ;;
-            c) echo -e "argument c\n" ;;
-            ?) echo -e "usage: ./test <-a **> <-b> <-c>" ;;
-        esac
-    done
-    \end{lstlisting}
+\begin{lstlisting}[language=bash]
+while getopts "a:bc" arg
+do
+    case $arg in
+        a) echo -e "argument a: $OPTARG\n" ;;
+        b) echo -e "argument b\n" ;;
+        c) echo -e "argument c\n" ;;
+        ?) echo -e "usage: ./test <-a **> <-b> <-c>" ;;
+    esac
+done
+\end{lstlisting}
     { 上面这个sample中: }\par
     \begin{itemize}
     \item {\small "a:bc"代表了-a需要参数, b和c是无参数的选项. }
@@ -47,67 +47,67 @@
 
 
 \section {\ZHH 获取当前脚本目录} {
-    \begin{lstlisting}[language=bash]
-    function get_pwd()
-    {
-        echo "$( cd "$( dirname "$0" )" && pwd )";
-    }
-    \end{lstlisting}
+\begin{lstlisting}[language=bash]
+function get_pwd()
+{
+    echo "$( cd "$( dirname "$0" )" && pwd )";
+}
+\end{lstlisting}
 }
 
 
 \section {\ZHH 遍历嵌套文件夹} {
-    \begin{lstlisting}[language=bash]
-    function loop_dir()
-    {
-        dir="$1";
-        for sub in $dir
-        do
-            if [ -d "$sub" ]; then
-                loop_dir $sub;
-            else
-                # do something
-            fi
-        done
-    }
-    \end{lstlisting}
+\begin{lstlisting}[language=bash]
+function loop_dir()
+{
+    dir="$1";
+    for sub in $dir
+    do
+        if [ -d "$sub" ]; then
+            loop_dir $sub;
+        else
+            # do something
+        fi
+    done
+}
+\end{lstlisting}
 }
 
 
 \section {\ZHH expect的典型用法} {
     {通过expect完成自动scp的过程参考: }\par
-    \begin{lstlisting}[language=bash]
-    function scp_target()
-    {
-        scp_src="$1";
-        scp_dst="$2";
-        scp_dst_passwd="$3";
-        expect -c "set timeout -1;
-            spawn scp -p -o StrictHostKeyChecking=no -r $scp_src $scp_dst;
-            expect "*assword:*" { send $scp_dst_passwd\r\n; }; 
-            expect eof {exit;}; "
-    }
-    \end{lstlisting}
+\begin{lstlisting}[language=bash]
+function scp_target()
+{
+    scp_src="$1";
+    scp_dst="$2";
+    scp_dst_passwd="$3";
+    expect -c "set timeout -1;
+        spawn scp -p -o StrictHostKeyChecking=no -r $scp_src $scp_dst;
+        expect "*assword:*" { send $scp_dst_passwd\r\n; }; 
+        expect eof {exit;}; "
+}
+\end{lstlisting}
 }
 
 \section {\ZHH 进程锁} {
     {通过flock实现进程锁, 尤其在执行shell脚本时比较实用, 具体可以参考man page. }\par
     {一个典型用法如下: }\par
-    \begin{lstlisting}[language=bash]
-    # `non-block (fail exit with code 1), exclusive lock`
-    flock -xn /tmp/test.lock -c test.sh
+\begin{lstlisting}[language=bash]
+# `non-block (fail exit with code 1), exclusive lock`
+flock -xn /tmp/test.lock -c test.sh
 
-    # `non-block, wait 5 seconds`
-    flock -n -w 5 /tmp/test.lock -c test.sh
-    \end{lstlisting}
+# `non-block, wait 5 seconds`
+flock -n -w 5 /tmp/test.lock -c test.sh
+\end{lstlisting}
 }
 
 \section {\ZHH 绑定cpu} {
     {在某些情况下, 可以通过绑定server进程到固定的cpu, 减少context切换, 一定程度上提高性能. 这个时候需要用到taskset.}\par
     {taskset的具体用法可以参照man page, 一个常见的sample如下: }\par
-    \begin{lstlisting}[language=bash]
-    taskset -c 0,2,4-6 -p 14285
-    \end{lstlisting}\par
+\begin{lstlisting}[language=bash]
+taskset -c 0,2,4-6 -p 14285
+\end{lstlisting}\par
 }
 
 \end{document}

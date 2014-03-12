@@ -120,27 +120,27 @@
     \gaccobsplitinv
 
     \item { 六元组表示的{\ZHH{矩阵(matrix)}}:
-        \begin{lstlisting}[language={[ANSI]C}]
+\begin{lstlisting}[language={[ANSI]C}]
 struct matrix {
-    int m[6];
+int m[6];
 };
-        \end{lstlisting}
+\end{lstlisting}
     }
 
     \gaccobsplitinv
 
     \item { {\ZHH{矩阵归一化(matrix identity)}}.
-        \begin{lstlisting}[language={[ANSI]C}]
+\begin{lstlisting}[language={[ANSI]C}]
 matrix_identity(struct matrix *mm) {
-    int *mat = mm->m;
-    mat[0] = 1024;
-    mat[1] = 0;
-    mat[2] = 0;
-    mat[3] = 1024;
-    mat[4] = 0;
-    mat[5] = 0;
+int *mat = mm->m;
+mat[0] = 1024;
+mat[1] = 0;
+mat[2] = 0;
+mat[3] = 1024;
+mat[4] = 0;
+mat[5] = 0;
 }
-        \end{lstlisting}
+\end{lstlisting}
         与\eqref{matrix}中不一样的是, 为了避免浮点运算, 这里以1024为基处理, 来保持整数运算, 实际上, 现在的变换矩阵\eqref{matrix}演变为:
         \begin{equation}\label{matrix_ejoy2d}
             M_{ejoy} =
@@ -162,49 +162,49 @@ matrix_identity(struct matrix *mm) {
     \gaccobsplitinv
 
     \item { {\ZHH{矩阵的乘法(matrix multiply)}}.
-        \begin{lstlisting}[language={[ANSI]C}]
+\begin{lstlisting}[language={[ANSI]C}]
 static inline void
 matrix_mul(struct matrix *mm, const struct matrix *mm1, const struct matrix *mm2) {
-    int *m = mm->m;
-    const int *m1 = mm1->m;
-    const int *m2 = mm2->m;
-    m[0] = (m1[0] * m2[0] + m1[1] * m2[2]) /1024;
-    m[1] = (m1[0] * m2[1] + m1[1] * m2[3]) /1024;
-    m[2] = (m1[2] * m2[0] + m1[3] * m2[2]) /1024;
-    m[3] = (m1[2] * m2[1] + m1[3] * m2[3]) /1024;
-    m[4] = (m1[4] * m2[0] + m1[5] * m2[2]) /1024 + m2[4];
-    m[5] = (m1[4] * m2[1] + m1[5] * m2[3]) /1024 + m2[5];
+int *m = mm->m;
+const int *m1 = mm1->m;
+const int *m2 = mm2->m;
+m[0] = (m1[0] * m2[0] + m1[1] * m2[2]) /1024;
+m[1] = (m1[0] * m2[1] + m1[1] * m2[3]) /1024;
+m[2] = (m1[2] * m2[0] + m1[3] * m2[2]) /1024;
+m[3] = (m1[2] * m2[1] + m1[3] * m2[3]) /1024;
+m[4] = (m1[4] * m2[0] + m1[5] * m2[2]) /1024 + m2[4];
+m[5] = (m1[4] * m2[1] + m1[5] * m2[3]) /1024 + m2[5];
 }
-        \end{lstlisting}
+\end{lstlisting}
         这里就是3*3的矩阵乘法, 唯一做了变化的就是在乘完之后除1024来保持scale.
     }
 
     \gaccobsplitinv
 
     \item { {\ZHH{矩阵的逆运算(matrix inverse)}}.
-        \begin{lstlisting}[language={[ANSI]C}]
+\begin{lstlisting}[language={[ANSI]C}]
 int
 matrix_inverse(const struct matrix *mm, struct matrix *mo) {
-    const int *m = mm->m;
-    int *o = mo->m;
-    if (m[1] == 0 && m[2] == 0) {
-        return _inverse_scale(m,o);
-    }
-    if (m[0] == 0 && m[3] == 0) {
-        return _inverse_rot(m,o);
-    }
-    int t = m[0] * m[3] - m[1] * m[2] ;
-    if (t == 0)
-        return 1;
-    o[0] = (int32_t)((int64_t)m[3] * (1024 * 1024) / t);
-    o[1] = (int32_t)(- (int64_t)m[1] * (1024 * 1024) / t);
-    o[2] = (int32_t)(- (int64_t)m[2] * (1024 * 1024) / t);
-    o[3] = (int32_t)((int64_t)m[0] * (1024 * 1024) / t);
-    o[4] = - (m[4] * o[0] + m[5] * o[2]) / 1024;
-    o[5] = - (m[4] * o[1] + m[5] * o[3]) / 1024;
-    return 0;
+const int *m = mm->m;
+int *o = mo->m;
+if (m[1] == 0 && m[2] == 0) {
+    return _inverse_scale(m,o);
 }
-        \end{lstlisting}
+if (m[0] == 0 && m[3] == 0) {
+    return _inverse_rot(m,o);
+}
+int t = m[0] * m[3] - m[1] * m[2] ;
+if (t == 0)
+    return 1;
+o[0] = (int32_t)((int64_t)m[3] * (1024 * 1024) / t);
+o[1] = (int32_t)(- (int64_t)m[1] * (1024 * 1024) / t);
+o[2] = (int32_t)(- (int64_t)m[2] * (1024 * 1024) / t);
+o[3] = (int32_t)((int64_t)m[0] * (1024 * 1024) / t);
+o[4] = - (m[4] * o[0] + m[5] * o[2]) / 1024;
+o[5] = - (m[4] * o[1] + m[5] * o[3]) / 1024;
+return 0;
+}
+\end{lstlisting}
         这里有几点需要注意的:
         \begin{itemize}
         \item { 因为归一化时做了1024的线性变换, 所以这里有1024的参数.}
@@ -216,7 +216,7 @@ matrix_inverse(const struct matrix *mm, struct matrix *mo) {
     \gaccobsplitinv
 
     \item { {\ZHH{矩阵的缩放(matrix scale)}}.
-        \begin{lstlisting}[language={[ANSI]C}]
+\begin{lstlisting}[language={[ANSI]C}]
 static inline void
 scale_mat(int *m, int sx, int sy) {
     if (sx != 1024) {
@@ -230,7 +230,7 @@ scale_mat(int *m, int sx, int sy) {
         m[5] = m[5] * sy / 1024;
     }
 }
-        \end{lstlisting}
+\end{lstlisting}
         我们在\eqref{transform_scale}中说到, 当$M$退化为只有$a$和$d$时, 可以看做一个缩放(scale). 这里的$a$对应就是代码中的$sx$, $b$对应的就是代码中的$sy$. 此时的\eqref{transform}演进成如下的形式:
         \begin{equation}
             M *
@@ -251,7 +251,7 @@ scale_mat(int *m, int sx, int sy) {
     \gaccobsplitinv
 
     \item { {\ZHH {矩阵的旋转(matrix rotate)}}
-        \begin{lstlisting}[language={[ANSI]C}]
+\begin{lstlisting}[language={[ANSI]C}]
 static inline void
 rot_mat(int *m, int d) {
     if (d==0)
@@ -279,7 +279,7 @@ rot_mat(int *m, int d) {
     m[4] = (m4_cosd - m5_sind) /1024;
     m[5] = (m4_sind + m5_cosd) /1024;
 }
-        \end{lstlisting}
+\end{lstlisting}
 
         在\eqref{transform_rotate}这种情况下, $M$退化为旋转矩阵, 此处代码的原理也很容易理解:
         \begin{equation}
@@ -298,13 +298,13 @@ rot_mat(int *m, int d) {
         \end{equation}
 
         代码中的$d$是经过变换的角度, 这个在lua的接口中有体现, 源码截取如下:
-        \begin{lstlisting}[language={[ANSI]C}]
+\begin{lstlisting}[language={[ANSI]C}]
 double r = luaL_checknumber(L,2);
 matrix_rot(m, r * (1024.0 / 360.0));
-        \end{lstlisting}
+\end{lstlisting}
 
         代码中对角度的计算做了一个$cos$表, $cos$和$sin$的计算都是通过查表来得到的, 代码中做$sin$计算时的64, 是$sin\theta = cos(90 - \theta)$经过1024换算后得到的.
-        \begin{lstlisting}[language={[ANSI]C}]
+\begin{lstlisting}[language={[ANSI]C}]
 static inline int
 icost(int dd) {
     static int t[256] = {
@@ -330,14 +330,14 @@ isind(int d) {
     int dd = 64 - d/4;
     return icost(dd);
 }
-        \end{lstlisting}
+\end{lstlisting}
     }
 
     \gaccobsplitinv
 
     \item{ {\ZHH{矩阵的SRT变换}}\par
         ejoy2d.matrix中用一个srt(scale, rotate, translate)结构体来封装了变换矩阵, 对矩阵的srt操作依次就是:scale\_mat, rot\_mat以及translate(直接增加$M$中的$t_x$和$t_y$).
-        \begin{lstlisting}[language=C]
+\begin{lstlisting}[language=C]
 struct srt {
 	int offx;
 	int offy;
@@ -371,7 +371,7 @@ matrix_sr(struct matrix *mat, int sx, int sy, int d) {
 	m[2] = -m3_sind /1024;
 	m[3] = m3_cosd /1024;
 }
-        \end{lstlisting}
+\end{lstlisting}
         其中函数matrix\_sr()是$b = c = 0$后的简化演进, 下面的公式省略了ejoy2d中1024的scale:
         \begin{equation}
         \begin{bmatrix}
@@ -397,7 +397,7 @@ matrix_sr(struct matrix *mat, int sx, int sy, int d) {
     \gaccobsplitinv
 
     \item{ {\ZHH{矩阵的lua接口}}\par
-        \begin{lstlisting}[language=C]
+\begin{lstlisting}[language=C]
 int
 ejoy2d_matrix(lua_State *L) {
 	luaL_Reg l[] = {
@@ -414,7 +414,7 @@ ejoy2d_matrix(lua_State *L) {
 	luaL_newlib(L,l);
 	return 1;
 }
-        \end{lstlisting}
+\end{lstlisting}
         这其中要注意的一点是, 如果lnew()没有输入参数的话, 则返回归一矩阵(scale 1024).
     }
 

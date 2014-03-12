@@ -37,40 +37,40 @@
         \item { 当增加cache节点时, 也只有该节点和它之前的第一个节点中间的数据受影响, 需要做remapping. }
         \end {itemize}
     \item { 简单的C代码参考(因为是链表组织的, 所以效率一般, 只做简单参考): }
-    \begin{lstlisting}[language={[ANSI]C}]
-    typedef struct conhash_t
-    {
-        struct list_head node_list;
-        hash_func key_hash;
-        hash_func node_hash;
-    } conhash_t;
+\begin{lstlisting}[language={[ANSI]C}]
+typedef struct conhash_t
+{
+    struct list_head node_list;
+    hash_func key_hash;
+    hash_func node_hash;
+} conhash_t;
 
-    #define CONHASH_NODE_NAME_SIZE 128
+#define CONHASH_NODE_NAME_SIZE 128
 
-    struct conhash_node_t
-    {
-        struct list_head link;
-        void* data;
-        uint32_t hash_value;
-    };
+struct conhash_node_t
+{
+    struct list_head link;
+    void* data;
+    uint32_t hash_value;
+};
 
-    void* conhash_node(conhash_t* ch, void* key)
-    {
-        uint32_t val;
-        struct conhash_node_t* n;
-        struct list_head* l;
-        if (!ch || !key) return NULL;
-        if (list_empty(&ch->node_list)) return NULL;
+void* conhash_node(conhash_t* ch, void* key)
+{
+    uint32_t val;
+    struct conhash_node_t* n;
+    struct list_head* l;
+    if (!ch || !key) return NULL;
+    if (list_empty(&ch->node_list)) return NULL;
 
-        val = ch->key_hash(key);
-        list_for_each_entry(n, struct conhash_node_t, &ch->node_list, link) {
-            if (n->hash_value >= val) return n->data;
-        }
-        l = ch->node_list.next;
-        n = list_entry(l, struct conhash_node_t, link);
-        return n->data;
+    val = ch->key_hash(key);
+    list_for_each_entry(n, struct conhash_node_t, &ch->node_list, link) {
+        if (n->hash_value >= val) return n->data;
     }
-    \end{lstlisting}
+    l = ch->node_list.next;
+    n = list_entry(l, struct conhash_node_t, link);
+    return n->data;
+}
+\end{lstlisting}
 \end {enumerate}
 
 \end {document}

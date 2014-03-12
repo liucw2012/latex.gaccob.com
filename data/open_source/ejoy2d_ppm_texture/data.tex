@@ -13,56 +13,56 @@
     \end {itemize}\par
 
     {pbm / pgm / ppm 图像的文件格式分为两部分: 文件头和数据部分. 一个典型ppm头的sample: }\par
-    \begin{lstlisting}[language=bash]
-    p6 # ` \color{gray} ppm格式`
-    1024 1024 # ` \color{gray} 高, 宽`
-    255 # ` \color{gray} 深度, 不一定就是255`
-    \end{lstlisting}
+\begin{lstlisting}[language=bash]
+p6 # ` \color{gray} ppm格式`
+1024 1024 # ` \color{gray} 高, 宽`
+255 # ` \color{gray} 深度, 不一定就是255`
+\end{lstlisting}
 
     {ppm的格式有p3和p6, p3表示用ascii码(文本)来表示数据, p6表示以字节码(二进制)来表示, 每一个像素按(r, g, b)的格式来存储. }\par
-    \begin{lstlisting}[language=bash]
-    P3
-    4 4
-    15
-    0  0  0  0  0  0  0  0  0 15  0 15
-    0  0  0  0 15  7  0  0  0  0  0  0
-    0  0  0  0  0  0  0 15  7  0  0  0
-    15 0 15  0  0  0  0  0  0  0  0  0
-    \end{lstlisting}
+\begin{lstlisting}[language=bash]
+P3
+4 4
+15
+0  0  0  0  0  0  0  0  0 15  0 15
+0  0  0  0 15  7  0  0  0  0  0  0
+0  0  0  0  0  0  0 15  7  0  0  0
+15 0 15  0  0  0  0  0  0  0  0  0
+\end{lstlisting}
 
     {pgm与ppm类似, 格式有p2和p5, p2表示文本, p5表示二进制.}\par
-    \begin{lstlisting}[language=bash]
-    P2
-    18 7
-    15
-    0 0 0 0 0 0 0 0 0 0 0 0 0  0  0  0  0 0
-    0 3 3 3 3 0 0 7 7 7 7 0 0 11 11 11 11 0
-    0 3 0 0 0 0 0 7 0 0 0 0 0 11  0  0  0 0
-    0 3 3 3 0 0 0 7 7 7 0 0 0 11 11 11  0 0
-    0 3 0 0 0 0 0 7 0 0 0 0 0 11  0  0  0 0
-    0 3 0 0 0 0 0 7 7 7 7 0 0 11 11 11 11 0
-    0 0 0 0 0 0 0 0 0 0 0 0 0  0  0  0  0 0
-    \end{lstlisting}
+\begin{lstlisting}[language=bash]
+P2
+18 7
+15
+0 0 0 0 0 0 0 0 0 0 0 0 0  0  0  0  0 0
+0 3 3 3 3 0 0 7 7 7 7 0 0 11 11 11 11 0
+0 3 0 0 0 0 0 7 0 0 0 0 0 11  0  0  0 0
+0 3 3 3 0 0 0 7 7 7 0 0 0 11 11 11  0 0
+0 3 0 0 0 0 0 7 0 0 0 0 0 11  0  0  0 0
+0 3 0 0 0 0 0 7 7 7 7 0 0 11 11 11 11 0
+0 0 0 0 0 0 0 0 0 0 0 0 0  0  0  0  0 0
+\end{lstlisting}
 
     {对于pbm来说, 格式为p1, 但是文件头中没有最大颜色, 因为用0和1来表示就可以了.}\par
-    \begin{lstlisting}[language=bash]
-    P1
-    24 7
-    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-    0 1 1 1 1 0 0 1 1 1 1 0 0 1 1 1 1 0 0 1 1 1 1 0
-    0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 1 0
-    0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 1 0
-    0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0
-    0 1 0 0 0 0 0 1 1 1 1 0 0 1 1 1 1 0 0 1 0 0 0 0
-    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-    \end{lstlisting}
+\begin{lstlisting}[language=bash]
+P1
+24 7
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 1 1 1 1 0 0 1 1 1 1 0 0 1 1 1 1 0 0 1 1 1 1 0
+0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 1 0
+0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1 1 0
+0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0
+0 1 0 0 0 0 0 1 1 1 1 0 0 1 1 1 1 0 0 1 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+\end{lstlisting}
 
     \par{参考文章: \href{http://www.cppblog.com/windcsn/archive/2005/11/11/ppm.html}{http://www.cppblog.com/windcsn/archive/2005/11/11/ppm.html}}
 }
 
 \section*{\ZHH \Large ejoy2d中的ppm源码}{
     {ejoy2d中的ppm贴图的处理都在lib/ppm.h和lib/ppm.c中. ejoy2d中用pgm贴图来描述alpha通道, 用ppm贴图来描述rgb通道. }\par
-    \begin{lstlisting}[language=C]
+\begin{lstlisting}[language=C]
 struct ppm {
     // `\color{gray} 指ppm贴图的格式, p1-p6分别对应1-6`
     int type;

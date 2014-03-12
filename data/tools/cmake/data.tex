@@ -29,66 +29,66 @@
 
 \section{\ZHH 常用的命令}{
 \begin{lstlisting}[language=bash]
-    # `指定cmake的版本依赖`
-    cmake_minimum_required(**)
+# `指定cmake的版本依赖`
+cmake_minimum_required(**)
 
-    # `指定项目名称`
-    project(**)
+# `指定项目名称`
+project(**)
 
-    # `指定头文件的搜索路径, 相当于指定gcc的-I参数`
-    include_directories
+# `指定头文件的搜索路径, 相当于指定gcc的-I参数`
+include_directories
 
-    # `动态链接库或静态链接库的搜索路径, 相当于gcc的-L参数`
-    link_directories
+# `动态链接库或静态链接库的搜索路径, 相当于gcc的-L参数`
+link_directories
 
-    # `包含子目录`
-    add_subdirectory
+# `包含子目录`
+add_subdirectory
 
-    # `添加编译参数, 例如add\_definition(“-Wall -ggdb -O0″)`
-    add_definitions
+# `添加编译参数, 例如add\_definition(“-Wall -ggdb -O0″)`
+add_definitions
 
-    # `添加链接库, 貌似可以不区分是共享库或者静态库, cmake会自动查找`
-    target_link_libraries
+# `添加链接库, 貌似可以不区分是共享库或者静态库, cmake会自动查找`
+target_link_libraries
 
-    # `编译可执行文件`
-    add_executable
+# `编译可执行文件`
+add_executable
 
-    # `编译lib`
-    add_library
+# `编译lib`
+add_library
 
-    # `打印日志到终端`
-    message([SEND_ERROR | STATUS | FATAL_ERROR], `“***”`)
+# `打印日志到终端`
+message([SEND_ERROR | STATUS | FATAL_ERROR], `“***”`)
 \end{lstlisting}
 }
 
 \section{\ZHH 常用的内部变量}{
 \begin{lstlisting}[language=bash]
-    # `C编译器`
-    MAKE_C_COMPILER
+# `C编译器`
+MAKE_C_COMPILER
 
-    # `C编译选项`
-    CMAKE_C_FLAGS
+# `C编译选项`
+CMAKE_C_FLAGS
 
-    # `C++编译器`
-    CMAKE_CXX_COMPILER
+# `C++编译器`
+CMAKE_CXX_COMPILER
 
-    # `C++编译选`
-    CMAKE_CXX_FLAGS
+# `C++编译选`
+CMAKE_CXX_FLAGS
 
-    # `可执行文件的存放路径`
-    EXECUTABLE_OUTPUT_PATH
+# `可执行文件的存放路径`
+EXECUTABLE_OUTPUT_PATH
 
-    # `库文件路径`
-    LIBRARY_OUTPUT_PATH
+# `库文件路径`
+LIBRARY_OUTPUT_PATH
 
-    # `build 类型, 可以指定Debug或者Release`
-    CMAKE_BUILD_TYPE
+# `build 类型, 可以指定Debug或者Release`
+CMAKE_BUILD_TYPE
 
-    # `库类型, 可以指定动态库或者静态库（ON/OFF)`
-    BUILD_SHARED_LIBS
+# `库类型, 可以指定动态库或者静态库（ON/OFF)`
+BUILD_SHARED_LIBS
 
-    # `项目的根目录, 可以在在CMakeLists.txt中set设置, 也可以cmake时-D指定`
-    CMAKE_SOURCE_DIR
+# `项目的根目录, 可以在在CMakeLists.txt中set设置, 也可以cmake时-D指定`
+CMAKE_SOURCE_DIR
 \end{lstlisting}
 }
 
@@ -102,162 +102,162 @@
 \section{\ZHH \href{https://github.com/gaccob/gbase}{gbase}中的sample}{
 {CMakeLists.txt:} \par
 \begin{lstlisting} [language=bash]
-    cmake_minimum_required(VERSION 2.8.10)
-    project(gbase)
-    include("${CMAKE_SOURCE_DIR}/gbase.cmake")
+cmake_minimum_required(VERSION 2.8.10)
+project(gbase)
+include("${CMAKE_SOURCE_DIR}/gbase.cmake")
 \end{lstlisting}
 
 {common.cmake:} \par
 \begin{lstlisting} [language=bash]
-    # `禁止共享库`
-    option(BUILD_SHARED_LIBS "build shared libraries." OFF)
+# `禁止共享库`
+option(BUILD_SHARED_LIBS "build shared libraries." OFF)
 
-    # `编译类型`
-    if (CMAKE_CONFIGURATION_TYPES)
-        message(STATUS "build type: ${CMAKE_CONFIGURATION_TYPES}")
-    elseif (CMAKE_BUILD_TYPE)
-        message(STATUS "build type: ${CMAKE_BUILD_TYPE}")
-    else()
-        set(CMAKE_BUILD_TYPE "Debug")
-        message(STATUS "build type: ${CMAKE_BUILD_TYPE}")
-    endif()
+# `编译类型`
+if (CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "build type: ${CMAKE_CONFIGURATION_TYPES}")
+elseif (CMAKE_BUILD_TYPE)
+    message(STATUS "build type: ${CMAKE_BUILD_TYPE}")
+else()
+    set(CMAKE_BUILD_TYPE "Debug")
+    message(STATUS "build type: ${CMAKE_BUILD_TYPE}")
+endif()
 
-    # `编译选项（仅gcc、clang、vc）`
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        set(COMMON_DEBUG "-ggdb -Wall -Werror -pg -O0")
-        set(COMMON_RELEASE "-ggdb -Wall -Werror -pg -O1")
-        set (COMMON_LINK_LIB z dl pthread m)
-    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        set(COMMON_DEBUG "-ggdb -Wall -Werror -pg -O0")
-        set(COMMON_RELEASE "-ggdb -Wall -Werror -pg -O1")
-        set (COMMON_LINK_LIB z dl pthread m)
-    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-        set(COMMON_DEBUG "/Od /MDd")
-        set(COMMON_RELEASE "/O2 /MD /D NDEBUG")
-    endif()
-    set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_DEBUG}")
-    set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_RELEASE}")
-    set(CMAKE_C_FLAGS_DEBUG "${COMMON_DEBUG}")
-    set(CMAKE_C_FLAGS_RELEASE "${COMMON_RELEASE}")
+# `编译选项（仅gcc、clang、vc）`
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(COMMON_DEBUG "-ggdb -Wall -Werror -pg -O0")
+    set(COMMON_RELEASE "-ggdb -Wall -Werror -pg -O1")
+    set (COMMON_LINK_LIB z dl pthread m)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(COMMON_DEBUG "-ggdb -Wall -Werror -pg -O0")
+    set(COMMON_RELEASE "-ggdb -Wall -Werror -pg -O1")
+    set (COMMON_LINK_LIB z dl pthread m)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(COMMON_DEBUG "/Od /MDd")
+    set(COMMON_RELEASE "/O2 /MD /D NDEBUG")
+endif()
+set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_DEBUG}")
+set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_RELEASE}")
+set(CMAKE_C_FLAGS_DEBUG "${COMMON_DEBUG}")
+set(CMAKE_C_FLAGS_RELEASE "${COMMON_RELEASE}")
 
-    # `递归包含工程定义 *.cmake文件`
-    macro(COMMON_PROJECT)
-    set(COMMON_PROJECT_FILTER "*.cmake")
-    foreach(basedir ${ARGV})
-        file(GLOB_RECURSE COMMON_PROJECT_FILES "${basedir}/${COMMON_PROJECT_FILTER}")
-        foreach(project_file ${COMMON_PROJECT_FILES})
-            message(STATUS "project file found -- ${project_file}")
-            include("${project_file}")
-        endforeach()
+# `递归包含工程定义 *.cmake文件`
+macro(COMMON_PROJECT)
+set(COMMON_PROJECT_FILTER "*.cmake")
+foreach(basedir ${ARGV})
+    file(GLOB_RECURSE COMMON_PROJECT_FILES "${basedir}/${COMMON_PROJECT_FILTER}")
+    foreach(project_file ${COMMON_PROJECT_FILES})
+        message(STATUS "project file found -- ${project_file}")
+        include("${project_file}")
     endforeach()
-    endmacro(COMMON_PROJECT)
+endforeach()
+endmacro(COMMON_PROJECT)
 
-    # `颜色回显`
-    function(CommonEcho)
-        # ${ARGV}, ${ARGN}
-        set(ECHO_WITH_COLOR_CMD "echo")
-        set(ECHO_WITH_COLOR_CMD_DP "")
-        if(UNIX OR CYGWIN OR APPLE)
-            set(TAG_RED     "\\033[31;1m")
-            set(TAG_GREEN   "\\033[32;1m")
-            set(TAG_YELLOW  "\\033[33;1m")
-            set(TAG_BLUE    "\\033[34;1m")
-            set(TAG_PURPLE  "\\033[35;1m")
-            set(TAG_CYAN    "\\033[36;1m")
-            set(TAG_RESET   "\\033[;0m")
-            set(ECHO_WITH_COLOR_CMD_DP "-e")
-        elseif(WIN32)
-            set(TAG_RED     "")
-            set(TAG_GREEN   "")
-            set(TAG_YELLOW  "")
-            set(TAG_BLUE    "")
-            set(TAG_PURPLE  "")
-            set(TAG_CYAN    "")
-            set(TAG_RESET   "")
-        endif()
-
-        set(ECHO_WITH_COLOR_PREFIX "")
-        set(ECHO_WITH_COLOR_SUFFIX "")
-        set(ECHO_WITH_COLOR_FLAG "false")
-        foreach (msg IN LISTS ARGV)
-            if ( "${msg}" STREQUAL "COLOR" )
-                set(ECHO_WITH_COLOR_FLAG "true")
-            elseif( "${ECHO_WITH_COLOR_FLAG}" STREQUAL "true" )
-                set(ECHO_WITH_COLOR_FLAG "false")
-                if ("${msg}" STREQUAL "RED")
-                    set(ECHO_WITH_COLOR_PREFIX "${TAG_RED}")
-                    set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
-                elseif ("${msg}" STREQUAL "GREEN")
-                    set(ECHO_WITH_COLOR_PREFIX "${TAG_GREEN}")
-                    set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
-                elseif ("${msg}" STREQUAL "YELLOW")
-                    set(ECHO_WITH_COLOR_PREFIX "${TAG_YELLOW}")
-                    set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
-                elseif ("${msg}" STREQUAL "BLUE")
-                    set(ECHO_WITH_COLOR_PREFIX "${TAG_BLUE}")
-                    set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
-                elseif ("${msg}" STREQUAL "PURPLE")
-                    set(ECHO_WITH_COLOR_PREFIX "${TAG_PURPLE}")
-                    set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
-                elseif ("${msg}" STREQUAL "CYAN")
-                    set(ECHO_WITH_COLOR_PREFIX "${TAG_CYAN}")
-                    set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
-                else ()
-                    message(WARNING "EchoWithColor ${msg} not supported.")
-                endif()
-            else()
-                execute_process(COMMAND ${ECHO_WITH_COLOR_CMD} ${ECHO_WITH_COLOR_CMD_DP} "${ECHO_WITH_COLOR_PREFIX}${msg}${ECHO_WITH_COLOR_SUFFIX}")
-            endif()
-        endforeach()
-
-    endfunction(CommonEcho)
-
-    # `编译平台`
-    if ("${CMAKE_CXX_SIZEOF_DATA_PTR}" STREQUAL "4")
-        CommonEcho(COLOR RED "-- platform ${CMAKE_CXX_PLATFORM_ID} 32")
-    elseif ("${CMAKE_CXX_SIZEOF_DATA_PTR}" STREQUAL "8")
-        CommonEcho(COLOR RED "-- platform ${CMAKE_CXX_PLATFORM_ID} 64")
-    else()
-        CommonEcho(COLOR RED "-- platform ${CMAKE_CXX_PLATFORM_ID} ??")
+# `颜色回显`
+function(CommonEcho)
+    # ${ARGV}, ${ARGN}
+    set(ECHO_WITH_COLOR_CMD "echo")
+    set(ECHO_WITH_COLOR_CMD_DP "")
+    if(UNIX OR CYGWIN OR APPLE)
+        set(TAG_RED     "\\033[31;1m")
+        set(TAG_GREEN   "\\033[32;1m")
+        set(TAG_YELLOW  "\\033[33;1m")
+        set(TAG_BLUE    "\\033[34;1m")
+        set(TAG_PURPLE  "\\033[35;1m")
+        set(TAG_CYAN    "\\033[36;1m")
+        set(TAG_RESET   "\\033[;0m")
+        set(ECHO_WITH_COLOR_CMD_DP "-e")
+    elseif(WIN32)
+        set(TAG_RED     "")
+        set(TAG_GREEN   "")
+        set(TAG_YELLOW  "")
+        set(TAG_BLUE    "")
+        set(TAG_PURPLE  "")
+        set(TAG_CYAN    "")
+        set(TAG_RESET   "")
     endif()
+
+    set(ECHO_WITH_COLOR_PREFIX "")
+    set(ECHO_WITH_COLOR_SUFFIX "")
+    set(ECHO_WITH_COLOR_FLAG "false")
+    foreach (msg IN LISTS ARGV)
+        if ( "${msg}" STREQUAL "COLOR" )
+            set(ECHO_WITH_COLOR_FLAG "true")
+        elseif( "${ECHO_WITH_COLOR_FLAG}" STREQUAL "true" )
+            set(ECHO_WITH_COLOR_FLAG "false")
+            if ("${msg}" STREQUAL "RED")
+                set(ECHO_WITH_COLOR_PREFIX "${TAG_RED}")
+                set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
+            elseif ("${msg}" STREQUAL "GREEN")
+                set(ECHO_WITH_COLOR_PREFIX "${TAG_GREEN}")
+                set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
+            elseif ("${msg}" STREQUAL "YELLOW")
+                set(ECHO_WITH_COLOR_PREFIX "${TAG_YELLOW}")
+                set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
+            elseif ("${msg}" STREQUAL "BLUE")
+                set(ECHO_WITH_COLOR_PREFIX "${TAG_BLUE}")
+                set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
+            elseif ("${msg}" STREQUAL "PURPLE")
+                set(ECHO_WITH_COLOR_PREFIX "${TAG_PURPLE}")
+                set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
+            elseif ("${msg}" STREQUAL "CYAN")
+                set(ECHO_WITH_COLOR_PREFIX "${TAG_CYAN}")
+                set(ECHO_WITH_COLOR_SUFFIX "${TAG_RESET}")
+            else ()
+                message(WARNING "EchoWithColor ${msg} not supported.")
+            endif()
+        else()
+            execute_process(COMMAND ${ECHO_WITH_COLOR_CMD} ${ECHO_WITH_COLOR_CMD_DP} "${ECHO_WITH_COLOR_PREFIX}${msg}${ECHO_WITH_COLOR_SUFFIX}")
+        endif()
+    endforeach()
+
+endfunction(CommonEcho)
+
+# `编译平台`
+if ("${CMAKE_CXX_SIZEOF_DATA_PTR}" STREQUAL "4")
+    CommonEcho(COLOR RED "-- platform ${CMAKE_CXX_PLATFORM_ID} 32")
+elseif ("${CMAKE_CXX_SIZEOF_DATA_PTR}" STREQUAL "8")
+    CommonEcho(COLOR RED "-- platform ${CMAKE_CXX_PLATFORM_ID} 64")
+else()
+    CommonEcho(COLOR RED "-- platform ${CMAKE_CXX_PLATFORM_ID} ??")
+endif()
 \end{lstlisting}
 
 {gbase.cmake: }\par
 \begin{lstlisting} [language=bash]
-    include("${CMAKE_SOURCE_DIR}/common.cmake")
+include("${CMAKE_SOURCE_DIR}/common.cmake")
 
-    # `包含头文件`
-    include_directories("${CMAKE_SOURCE_DIR}")
+# `包含头文件`
+include_directories("${CMAKE_SOURCE_DIR}")
 
-    set(GBASE_DIR_CORE "${CMAKE_SOURCE_DIR}/core")
-    set(GBASE_DIR_DS "${CMAKE_SOURCE_DIR}/ds")
-    set(GBASE_DIR_NET "${CMAKE_SOURCE_DIR}/net")
-    set(GBASE_DIR_UTIL "${CMAKE_SOURCE_DIR}/util")
-    set(GBASE_DIR_TEST "${CMAKE_SOURCE_DIR}/test")
+set(GBASE_DIR_CORE "${CMAKE_SOURCE_DIR}/core")
+set(GBASE_DIR_DS "${CMAKE_SOURCE_DIR}/ds")
+set(GBASE_DIR_NET "${CMAKE_SOURCE_DIR}/net")
+set(GBASE_DIR_UTIL "${CMAKE_SOURCE_DIR}/util")
+set(GBASE_DIR_TEST "${CMAKE_SOURCE_DIR}/test")
 
-    set(GBASE_LIB gbase)
+set(GBASE_LIB gbase)
 
-    # `链接选项`
-    set (GBASE_LIB_LINK ${COMMON_LINK_LIB})
+# `链接选项`
+set (GBASE_LIB_LINK ${COMMON_LINK_LIB})
 
-    # `编译lib的源文件`
-    aux_source_directory(${GBASE_DIR_CORE} GBASE_SOURCE)
-    aux_source_directory(${GBASE_DIR_DS} GBASE_SOURCE)
-    aux_source_directory(${GBASE_DIR_NET} GBASE_SOURCE)
-    aux_source_directory(${GBASE_DIR_UTIL} GBASE_SOURCE)
-    foreach(GBASE_SOURCE_FILE ${GBASE_SOURCE})
-        CommonEcho(COLOR CYAN "===> source: ${GBASE_SOURCE_FILE}")
-    endforeach()
+# `编译lib的源文件`
+aux_source_directory(${GBASE_DIR_CORE} GBASE_SOURCE)
+aux_source_directory(${GBASE_DIR_DS} GBASE_SOURCE)
+aux_source_directory(${GBASE_DIR_NET} GBASE_SOURCE)
+aux_source_directory(${GBASE_DIR_UTIL} GBASE_SOURCE)
+foreach(GBASE_SOURCE_FILE ${GBASE_SOURCE})
+    CommonEcho(COLOR CYAN "===> source: ${GBASE_SOURCE_FILE}")
+endforeach()
 
-    # `编译lib`
-    add_library(${GBASE_LIB} ${GBASE_SOURCE})
+# `编译lib`
+add_library(${GBASE_LIB} ${GBASE_SOURCE})
 
-    # `递归增加test`
-    file(GLOB GBASE_TEST_DIRS ${GBASE_DIR_TEST}/*test*)
-    foreach(GBASE_TEST_DIR ${GBASE_TEST_DIRS})
-        CommonEcho(COLOR CYAN "===> directory: ${GBASE_TEST_DIR}")
-        add_subdirectory(${GBASE_TEST_DIR})
-    endforeach()
+# `递归增加test`
+file(GLOB GBASE_TEST_DIRS ${GBASE_DIR_TEST}/*test*)
+foreach(GBASE_TEST_DIR ${GBASE_TEST_DIRS})
+    CommonEcho(COLOR CYAN "===> directory: ${GBASE_TEST_DIR}")
+    add_subdirectory(${GBASE_TEST_DIR})
+endforeach()
 \end{lstlisting}
 }
 
