@@ -5,6 +5,10 @@
     <description>gaccob的blog</description>
     <link>http://latex.gaccob.com</link>
     <item>
+        <title>学习ejoy2d——spritepack</title>
+        <link>http://latex.gaccob.com/open_source/ejoy2d_spritepack.pdf</link>
+    </item>
+    <item>
         <title>单点服务与热备机制</title>
         <link>http://latex.gaccob.com/game_dev/hot_standby.pdf</link>
     </item>
