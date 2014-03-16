@@ -2,21 +2,44 @@
 
 \title {\ZHH \huge 学习ejoy2d——sprite}
 \author {\small gaccob}
-\date {\small 2014 年 3 月 12 日}
+\date {\small 2014 年 3 月 14 日}
 \maketitle
 
-\section {\ZHH sprite} {
+\section {\ZHH sprite是什么} {
+    { "sprite是ejoy2d中可以处理的基本图形对象, 每个 sprite 都是若干图元以树状组合起来的".}\par
+}
 
-    { sprite是ejoy2d中最复杂的数据结构, "每个 sprite 都是若干图元以树状组合起来的".}\par
+\section {\ZHH sprite属性} {
+
+    { 结合github上的文档说明, 先看一下C kernel中sprite数据结构定义.}\par
 
 \begin{lstlisting}[language=C]
+// file:  lib/spritepack.h
+struct sprite_trans {
+    struct matrix * mat;
+    uint32_t color;
+    uint32_t additive;
+    int program;
+};
+
+// file:  lib/sprite.h
 struct sprite {
+
+    // `\color{gray} 父节点, 与children节点一起, 维系了树状结构`
+    // `\color{gray} lua接口: sprite.has\_parent(只读), sprite.parent\_name(只读)`
     struct sprite * parent;
+
+    // `\color{gray} 图元类型`
     uint16_t type;
 
     // `\color{gray} 唯一id, 因为是数组, 所以不建议散的太开`
     uint16_t id;
 
+    // `\color{gray} t.mat 渲染时的变换矩阵, 运行期, 默认单位矩阵`
+    // `\color{gray} t.color 渲染时的混合颜色, ARGB32, 默认为0xFFFFFFFF, 作用域是整个子树, 最常见的是做alpha半透明效果, 例如0x80FFFFFF就是50\%的半透明`
+    // `\color{gray} t.additive 渲染时的叠加颜色, RGB24, 默认为0, 作用域是整个子树`
+    // `\color{gray} t.program 指定shader`
+    // `\color{gray} Lua API: sprite.matrix(读写), sprite.color(读写), sprite.additive(读写), sprite.program(只读)`
     struct sprite_trans t;
 
     // `\color{gray} 5种基本图元`
@@ -29,22 +52,123 @@ struct sprite {
         struct matrix *mat;
     } s;
 
-    // 渲染时的附加矩阵
+    // `\color{gray} 只读anchor的特殊属性, 返回上一次这个anchor对象最终渲染的世界矩阵`
+    // `\color{gray} anchor.visible=false, 当不可显时，引擎不计算 world matrix`
+    // `\color{gray} Lua API: sprite.wolrd\_matrix(只读)`
     struct matrix mat;
 
+    // `\color{gray} 总帧数 与 开始帧数`
+    // `\color{gray} Lua API: sprite.frame\_count(只读)`
     int start_frame;
     int total_frame;
+
+    // `\color{gray} 当前帧号`
+    // `\color{gray} Lua API: sprite.frame(读写)`
     int frame;
+
+    // `\color{gray} 如果设置为false, 则整个子树不显示`
+    // `\color{gray} Lua API: sprite.visible(读写)`
     bool visible;
+
+    // `\color{gray} 对象是否截获 test 调用, 多用于 UI 控制`
+    // `\color{gray} Lua API: sprite.message(读写)`
     bool message;
-    const char *name;	// name for parent
+
+    // `\color{gray} Lua API: sprite.name(只读)`
+    const char *name;
+
     union {
         struct sprite * children[1];
+
+        // `\color{gray} label的文字`
+        // `\color{gray} Lua API: sprite.text(读写)`
         const char * text;
+
+        // `\color{gray} panel是否有scissor`
+        // `\color{gray} Lua API: sprite.scissor(只读)`
         int scissor;
     } data;
 };
+
+// `\color{gray} 上面注释中提到的Lua API基本都包含在了getter\&setter中`
+// file:  lib/lsprite.c
+static void
+lgetter(lua_State *L) {
+	luaL_Reg l[] = {
+		{"frame", lgetframe},
+		{"frame_count", lgettotalframe },
+		{"visible", lgetvisible },
+		{"name", lgetname },
+		{"text", lgettext},
+		{"color", lgetcolor },
+		{"additive", lgetadditive },
+		{"message", lgetmessage },
+		{"matrix", lgetmat },
+		{"world_matrix", lgetwmat },
+		{"parent_name", lgetparentname },
+		{"has_parent", lhasparent },
+		{NULL, NULL},
+	};
+	luaL_newlib(L,l);
+}
+
+static void
+lsetter(lua_State *L) {
+	luaL_Reg l[] = {
+		{"frame", lsetframe},
+		{"action", lsetaction},
+		{"visible", lsetvisible},
+		{"matrix" , lsetmat},
+		{"text", lsettext},
+		{"color", lsetcolor},
+		{"additive", lsetadditive },
+		{"message", lsetmessage },
+		{"program", lsetprogram },
+		{"scissor", lsetscissor },
+		{NULL, NULL},
+	};
+	luaL_newlib(L,l);
+}
 \end{lstlisting}
+
+    {上层Lua中, 依据setter\&getter接口, 设置sprite的metatable. }\par
+
+\begin{lstlisting}[language=lua]
+// file:  ejoy2d/sprite.lua
+function sprite_meta.__index(spr, key)
+	if method[key] then
+		return method[key]
+	end
+	local getter = get[key]
+	if getter then
+		return getter(spr)
+	end
+	local child = fetch(spr, key)
+
+	if child then
+		return child
+	else
+		print("Unsupport get " ..  key)
+		return nil
+	end
+end
+
+function sprite_meta.__newindex(spr, key, v)
+	local setter = set[key]
+	if setter then
+		setter(spr, v)
+		return
+	end
+	assert(debug.getmetatable(v) == sprite_meta, "Need a sprite")
+	method.mount(spr, key, v)
+end
+\end{lstlisting}
+
+}
+
+\section {\ZHH sprite方法} {
+
+    {看完了C kernel中sprite的数据结构及Lua metatable(属性), 下面来看一下sprite的方法.}\par
 
 }
 
