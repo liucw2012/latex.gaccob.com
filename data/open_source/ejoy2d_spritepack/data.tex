@@ -14,7 +14,7 @@
 
 {"这只是方便开发，在产品发行时不应该这样做". 从版本的安全性来说, 还需要做一些加密工作, 防止资源被破解. }\par
 
-{关于资源, 根据github文档所述, 有\href{https://github.com/robinxb/flash-parser}{开源工具}支持从 cocos builder 中导出. }\par
+{关于资源, 根据github文档所述, 有\href{https://github.com/robinxb/flash-parser}{开源工具链}支持从flash资源中导出. }\par
 
 {sprite目前支持5种图元:}\par
 \begin{lstlisting}[language=C]
@@ -24,7 +24,7 @@
 #define TYPE_POLYGON 3
 #define TYPE_LABEL 4
 #define TYPE_PANNEL 5
-// `\color{gray} anchor是一个比较特殊的类型, 它没有资源数据, 仅提供了一个锚点, 可以挂载其他sprite`
+// `\color{gray} anchor是一个比较特殊的类型, 它没有对应的资源, 仅提供了一个锚点, 可以挂载其他sprite`
 #define TYPE_ANCHOR 6
 
 // `\color{gray} TYPE\_PICTURE 四边形`
@@ -75,7 +75,7 @@ struct pack_component {
     const char *name;
 };
 
-// `\color{gray} 这就是导入的lua描述文件的C数据结构`
+// `\color{gray} C kernel 使用的sprite图元包`
 // `\color{gray} data数组的下标是sprite的id, 也就是component引用的id.`
 struct sprite_pack {
     int n;
@@ -85,7 +85,8 @@ struct sprite_pack {
 };
 \end{lstlisting}
 
-{spritepack的C代码中最重要的就是limport()函数, 它负责导入二进制资源.}\par
+{spritepack的C代码中最重要的就是limport()函数, 它负责导入pack生成的meta数据到C使用的sprite图元包.}\par
+{limport()封装成了lua接口, 在spritepack.init()中调用, 我觉得容易跟spritepack.import()的作用弄混... }\par
 \begin{lstlisting}[language=C]
 // `\color{gray} lua的输入参数格式:`
 // `\color{gray}    number: texture id |  table: texture id table`
@@ -128,7 +129,7 @@ limport(lua_State *L) {
         pack->tex[0] = (int)lua_tointeger(L,1);
     }
 
-    // `\color{gray} 构造一个输入数据流(指向目标资源数据), 方便后续导入`
+    // `\color{gray} 构造一个输入数据流(指向pack后的二进制数据), 方便后续操作`
     struct import_stream is;
     is.alloc = &alloc;
     is.pack = pack;
@@ -152,9 +153,8 @@ limport(lua_State *L) {
 }
 \end{lstlisting}
 
-{需要注意的是, sprite\_pack数据内存(包括了它的所有图元), 都是从分配器(源自Lua)中分配, "C对象生命周期全部由Lua VM管理". }\par
-
-{spritepack.lua的接口pack()和init(), 将 lua table 资源打包成元数据, 或者在运行时从元数据中导入二进制数据. 结合example里的sample.lua范例, 很好理解.}\par
+{需要注意的是, sprite\_pack数据(包括了它的所有图元), 内存都是从分配器(源自Lua)中分配, "C对象生命周期全部由Lua VM管理". }\par
+{spritepack.lua的接口pack()和init(), 将lua table描述打包成包含二进制数据的meta表, 或者在运行时导入meta为C kernel使用的sprite图元包. }\par
 
 \begin{lstlisting}[language=lua]
 
@@ -219,7 +219,7 @@ function spritepack.pack(data)
 
     ret.texture = ret.texture + 1
 
-    -- `\color{gray} 这里把table做了一次拼接`
+    -- `\color{gray} 这里把table做了一次拼接, 实际上就是打包成一块二进制数据`
     ret.data = table.concat(ret.data)
 
     ret.size = ret.size + pack.pack_size(ret.maxid, ret.texture)
@@ -245,7 +245,7 @@ function spritepack.init( name, texture, meta )
 end
 \end{lstlisting}
 
-{spritepack.lua的接口export()和import(), 对pack后的meta数据做打包成字符串, 或者从字符串解包.}\par
+{spritepack.lua的接口export()和import(), 将pack后的meta数据做打包成字符串, 或者从字符串解包.}\par
 {github上文档原文: "可以用 spritepack.export 在开发期预处理 spritepack.pack 生成的结果, spritepack.export 返回一个字符串，可将这个字符串持久化到文件中". } \par
 
 \begin{lstlisting}[language=lua]
