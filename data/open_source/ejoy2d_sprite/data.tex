@@ -6,7 +6,7 @@
 \maketitle
 
 \section {\ZHH sprite是什么} {
-    { "sprite是ejoy2d中可以处理的基本图形对象, 每个 sprite 都是若干图元以树状组合起来的".}\par
+    { "sprite是ejoy2d中可以处理的基本图形对象, 每个 sprite 都是若干图元以树状组合起来的". 目前只有animation图元类型的sprite有孩子, 其他都是单个节点的存在. }\par
 }
 
 \section {\ZHH sprite属性} {
@@ -94,40 +94,40 @@ struct sprite {
 // file:  lib/lsprite.c
 static void
 lgetter(lua_State *L) {
-	luaL_Reg l[] = {
-		{"frame", lgetframe},
-		{"frame_count", lgettotalframe },
-		{"visible", lgetvisible },
-		{"name", lgetname },
-		{"text", lgettext},
-		{"color", lgetcolor },
-		{"additive", lgetadditive },
-		{"message", lgetmessage },
-		{"matrix", lgetmat },
-		{"world_matrix", lgetwmat },
-		{"parent_name", lgetparentname },
-		{"has_parent", lhasparent },
-		{NULL, NULL},
-	};
-	luaL_newlib(L,l);
+    luaL_Reg l[] = {
+        {"frame", lgetframe},
+        {"frame_count", lgettotalframe },
+        {"visible", lgetvisible },
+        {"name", lgetname },
+        {"text", lgettext},
+        {"color", lgetcolor },
+        {"additive", lgetadditive },
+        {"message", lgetmessage },
+        {"matrix", lgetmat },
+        {"world_matrix", lgetwmat },
+        {"parent_name", lgetparentname },
+        {"has_parent", lhasparent },
+        {NULL, NULL},
+    };
+    luaL_newlib(L,l);
 }
 
 static void
 lsetter(lua_State *L) {
-	luaL_Reg l[] = {
-		{"frame", lsetframe},
-		{"action", lsetaction},
-		{"visible", lsetvisible},
-		{"matrix" , lsetmat},
-		{"text", lsettext},
-		{"color", lsetcolor},
-		{"additive", lsetadditive },
-		{"message", lsetmessage },
-		{"program", lsetprogram },
-		{"scissor", lsetscissor },
-		{NULL, NULL},
-	};
-	luaL_newlib(L,l);
+    luaL_Reg l[] = {
+        {"frame", lsetframe},
+        {"action", lsetaction},
+        {"visible", lsetvisible},
+        {"matrix" , lsetmat},
+        {"text", lsettext},
+        {"color", lsetcolor},
+        {"additive", lsetadditive },
+        {"message", lsetmessage },
+        {"program", lsetprogram },
+        {"scissor", lsetscissor },
+        {NULL, NULL},
+    };
+    luaL_newlib(L,l);
 }
 \end{lstlisting}
 
@@ -136,40 +136,241 @@ lsetter(lua_State *L) {
 \begin{lstlisting}[language=lua]
 // file:  ejoy2d/sprite.lua
 function sprite_meta.__index(spr, key)
-	if method[key] then
-		return method[key]
-	end
-	local getter = get[key]
-	if getter then
-		return getter(spr)
-	end
-	local child = fetch(spr, key)
+    if method[key] then
+        return method[key]
+    end
+    local getter = get[key]
+    if getter then
+        return getter(spr)
+    end
+    local child = fetch(spr, key)
 
-	if child then
-		return child
-	else
-		print("Unsupport get " ..  key)
-		return nil
-	end
+    if child then
+        return child
+    else
+        print("Unsupport get " ..  key)
+        return nil
+    end
 end
 
 function sprite_meta.__newindex(spr, key, v)
-	local setter = set[key]
-	if setter then
-		setter(spr, v)
-		return
-	end
-	assert(debug.getmetatable(v) == sprite_meta, "Need a sprite")
-	method.mount(spr, key, v)
+    local setter = set[key]
+    if setter then
+        setter(spr, v)
+        return
+    end
+    assert(debug.getmetatable(v) == sprite_meta, "Need a sprite")
+    method.mount(spr, key, v)
 end
 \end{lstlisting}
 
 }
 
-\section {\ZHH sprite方法} {
+\section {\ZHH sprite.new} {
+    {Lua接口sprite.new的实现如下: }\par
+\begin{lstlisting}[language=lua]
+-- file: ejoy2d/sprite.lua
+function sprite.new(packname, name)
 
-    {看完了C kernel中sprite的数据结构及Lua metatable(属性), 下面来看一下sprite的方法.}\par
+    -- `\color{gray} 这里的资源是预先已经初始化过的`
+    local pack, id = pack.query(packname, name)
 
+    -- `\color{gray} 调用C接口实现new`
+    local cobj = c.new(pack,id)
+
+    -- `\color{gray} 设置meta`
+    if cobj then
+        return debug.setmetatable(cobj, sprite_meta)
+    end
+end
+
+-- file: ejoy2d/spritepack.lua
+-- `\color{gray} 从已经import的资源中查询spritepack数据, name可以是名字或者id`
+function spritepack.query( packname, name )
+    local p = assert(pack_pool[packname], "Load package first")
+    local id
+    if type(name) == "number" then
+        id = name
+    else
+        id = p.export[name]
+    end
+    if not id then
+        error(string.format("'%s' is not exist in package %s", name, packname))
+    end
+    return p.cobj, id
+end
+\end{lstlisting}
+
+    {相关的C代码如下:} \par
+\begin{lstlisting}[language=C]
+// file: lib/lsprite.c
+// `\color{gray} 输入: userdata spritepack`
+//      `\color{gray} number id`
+// `\color{gray} 输出: userdata sprite`
+static int
+lnew(lua_State *L) {
+    struct sprite_pack * pack = (struct sprite_pack *)lua_touserdata(L, 1);
+    if (pack == NULL) {
+        return luaL_error(L, "Need a sprite pack");
+    }
+    int id = (int)luaL_checkinteger(L, 2);
+    struct sprite * s = newsprite(L, pack, id);
+    if (s) {
+        return 1;
+    }
+    return 0;
+}
+
+// `\color{gray} 图元类型的sprite new`
+static struct sprite *
+newsprite(lua_State *L, struct sprite_pack *pack, int id) {
+    // `\color{gray} anchor类型单独new`
+    if (id == ANCHOR_ID) {
+        return newanchor(L);
+    }
+
+    // `\color{gray} 计算sprite size, 从Lua VM中分配内存`
+    int sz = sprite_size(pack, id);
+    if (sz == 0) {
+        return NULL;
+    }
+    struct sprite * s = (struct sprite *)lua_newuserdata(L, sz);
+
+    // `\color{gray} 从spritepack初始化sprite数据`
+    sprite_init(s, pack, id, sz);
+
+    // `\color{gray} 递归载入孩子sprite(只有animation会触发)`
+    int i;
+    for (i=0;;i++) {
+
+        // `\color{gray} 引用的component`
+        int childid = sprite_component(s, i);
+        if (childid < 0)
+            break;
+
+        if (i==0) {
+            lua_newtable(L);
+            lua_pushvalue(L,-1);
+            lua_setuservalue(L, -3);    // set uservalue for sprite
+        }
+
+        // `\color{gray} 初始化child`
+        struct sprite *c = newsprite(L, pack, childid);
+
+        // `\color{gray} 设置child名字`
+        c->name = sprite_childname(s, i);
+
+        // `\color{gray} 挂载child, 组织成树状结构`
+        sprite_mount(s, i, c);
+
+        // `\color{gray} 如果touchable, sprite->message设置为true`
+        update_message(c, pack, id, i, s->frame);
+
+        // `\color{gray} todo:`
+        if (c) {
+            lua_rawseti(L, -2, i+1);
+        }
+    }
+    if (i>0) {
+        lua_pop(L,1);
+    }
+    return s;
+}
+
+// `\color{gray} anchor类型的sprite, 没有spritepack数据`
+static struct sprite *
+newanchor(lua_State *L) {
+    // `\color{gray} 比常规sprite多了个matrix`
+    // `\color{gray} 此处代码加到sprite\_size()更好看一些, 这里为了少一次函数调用?`
+    int sz = sizeof(struct sprite) + sizeof(struct matrix);
+    struct sprite * s = (struct sprite *)lua_newuserdata(L, sz);
+
+    s->parent = NULL;
+    s->t.mat = NULL;
+    s->t.color = 0xffffffff;
+    s->t.additive = 0;
+    s->t.program = PROGRAM_DEFAULT;
+    s->message = false;
+
+    // `\color{gray} 默认不可见`
+    s->visible = false;
+
+    s->name = NULL;
+
+    // `\color{gray} 所有的anchor类型都是一个默认id`
+    s->id = ANCHOR_ID;
+
+    s->type = TYPE_ANCHOR;
+
+    // `\color{gray} anchor类型用到的matrix, 不像其他图元类型sprite数据在pack包中,`
+    // `\color{gray} 所以这里要自己分配内存, 在sprite对象之后`
+    s->s.mat = (struct matrix *)(s+1);
+    matrix_identity(s->s.mat);
+
+    return s;
+}
+
+// file: lib/sprite.c
+// `\color{gray} 从spritepack数据初始化sprite对象`
+void
+sprite_init(struct sprite * s, struct sprite_pack * pack, int id, int sz) {
+    if (id < 0 || id >= pack->n)
+        return;
+    s->parent = NULL;
+    s->t.mat = NULL;
+    s->t.color = 0xffffffff;
+    s->t.additive = 0;
+    s->t.program = PROGRAM_DEFAULT;
+    s->message = false;
+    s->visible = true;
+    s->name = NULL;
+    s->id = id;
+    s->type = pack->type[id];
+
+    // `\color{gray} animation类型单独处理, 设置frame和action`
+    if (s->type == TYPE_ANIMATION) {
+        struct pack_animation * ani = (struct pack_animation *)pack->data[id];
+        s->s.ani = ani;
+        s->frame = 0;
+
+        // `\color{gray} 默认只有一个action, 传入NULL`
+        sprite_action(s, NULL);
+
+        // `\color{gray} 这里时保证分配的内存足够用`
+        // `\color{gray} animation包括孩子节点, 多出来n-1个child指针`
+        // `\color{gray} child默认都是NULL`
+        int i;
+        int n = ani->component_number;
+        assert(sz >= sizeof(struct sprite) + (n - 1) * sizeof(struct sprite *));
+        for (i=0; i<n ;i++) {
+            s->data.children[i] = NULL;
+        }
+    }
+    // `\color{gray} 其他类型`
+    else {
+        // `\color{gray} 因为是union, data是void*, 指定任意其他图元类型都一样`
+        s->s.pic = (struct pack_picture *)pack->data[id];
+
+        // `\color{gray} 非animation无需frame`
+        s->start_frame = 0;
+        s->total_frame = 0;
+        s->frame = 0;
+
+        // `\color{gray} API sprite.text设置, 默认NULL`
+        s->data.text = NULL;
+
+        // `\color{gray} 减掉一个指针大小, 是因为无需计算animation child, 还是代码没修改?`
+        assert(sz >= sizeof(struct sprite) - sizeof(struct sprite *));
+
+        // `\color{gray} pannel类型需要设置scissor`
+        if (s->type == TYPE_PANNEL) {
+            struct pack_pannel * pp = (struct pack_pannel *)pack->data[id];
+            s->data.scissor = pp->scissor;
+        }
+    }
+}
+
+\end{lstlisting}
 }
 
 \end{document}
