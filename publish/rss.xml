@@ -5,6 +5,10 @@
     <description>gaccob的blog</description>
     <link>http://latex.gaccob.com</link>
     <item>
+        <title>HTML5之WebSocket</title>
+        <link>http://latex.gaccob.com/web/websocket.pdf</link>
+    </item>
+    <item>
         <title>学习ejoy2d——spritepack</title>
         <link>http://latex.gaccob.com/open_source/ejoy2d_spritepack.pdf</link>
     </item>
